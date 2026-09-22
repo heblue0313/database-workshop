@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>資料庫工作坊｜儀表板</title>
+<script>try{var t=localStorage.getItem('ws-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{--bg:#FBF9F3;--ink:#1A2333;--brand:#18499E;--brand-soft:#E8EDF6;--accent:#E2622C;--accent-soft:#FBEDE5;
+--muted:#6E7480;--faint:#9AA0AA;--line:#DED7C9;--line-soft:#EBE5D9;--card:#FFF;--sheet:#F2EFE6;--ok:#2F7D5B;--risk:#C0392B;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161E;--ink:#E7EAF0;--brand:#8AAEEB;--brand-soft:#1C2941;--accent:#F0875A;--accent-soft:#3A241A;
+--muted:#A3A9B4;--faint:#7A818D;--line:#2D3441;--line-soft:#232A35;--card:#181D27;--sheet:#1D232E;--ok:#62C295;--risk:#F07F72;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161E;--ink:#E7EAF0;--brand:#8AAEEB;--brand-soft:#1C2941;--accent:#F0875A;--accent-soft:#3A241A;
+--muted:#A3A9B4;--faint:#7A818D;--line:#2D3441;--line-soft:#232A35;--card:#181D27;--sheet:#1D232E;--ok:#62C295;--risk:#F07F72;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+font-size:16px;line-height:1.7;padding:0 0 56px}
+.top .wrap{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.theme-btn{flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px;font-weight:700;padding:9px 15px;min-height:40px;cursor:pointer;font-family:inherit}
+.theme-btn:hover{border-color:var(--brand);color:var(--brand)}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+header.top{border-bottom:1px solid var(--line);padding:24px 0 18px;margin-bottom:20px}
+.kicker{font-size:12px;letter-spacing:.2em;font-weight:700;color:var(--accent)}
+h1{font-size:26px;line-height:1.3;margin-top:8px}
+h2{font-size:19px;margin:26px 0 12px;padding-top:20px;border-top:1px solid var(--line)}
+p{margin:8px 0}
+.muted{color:var(--muted);font-size:14px}
+.tiny{font-size:13px;color:var(--faint)}
+textarea{width:100%;height:110px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+padding:10px 12px;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.5;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+button{border:0;background:var(--brand);color:#fff;font-size:16px;font-weight:700;padding:13px 22px;
+cursor:pointer;font-family:inherit;min-height:48px;flex:1;min-width:150px}
+button.ghost{background:var(--card);color:var(--muted);border:1px solid var(--line)}
+button:active{opacity:.85}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.kpi{background:var(--card);border:1px solid var(--line);padding:14px 16px}
+.kpi .k{font-size:12px;letter-spacing:.1em;color:var(--faint);font-weight:700}
+.kpi .v{font-size:30px;font-weight:700;color:var(--brand);line-height:1.2;margin-top:2px}
+.kpi .v small{font-size:14px;color:var(--muted);font-weight:400;margin-left:4px}
+.kpi .v.date{font-size:20px}
+.card{background:var(--card);border:1px solid var(--line);padding:16px 18px;margin:12px 0}
+.bar{display:grid;grid-template-columns:5.5em minmax(0,1fr) 3.4em;gap:10px;align-items:center;margin:7px 0;font-size:14px}
+.bar i{display:block;height:15px;background:var(--brand);min-width:2px}
+.bar.hot i{background:var(--accent)}
+.bar b{text-align:right;font-variant-numeric:tabular-nums}
+.bar span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+svg{display:block;width:100%;height:auto}
+.grp{border-top:1px solid var(--line-soft);padding:10px 0;font-size:14px}
+.grp:first-child{border-top:0}
+.grp .t{font-weight:700}
+.grp .m{color:var(--muted);font-size:13px}
+.grp .n{color:var(--accent);font-weight:700}
+.alert{background:var(--accent-soft);color:var(--accent);border-left:3px solid var(--accent);padding:11px 14px;margin:12px 0;font-size:14px;font-weight:700}
+footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--faint)}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div>
+    <p class="kicker">資料庫工作坊 · 把表變成一眼看懂的圖</p>
+    <h1>儀表板</h1>
+  </div>
+  <button type="button" class="theme-btn" id="theme">深色</button>
+</div></header>
+
+<main class="wrap">
+  <p class="muted">到試算表的「資料」分頁，選取整張表（<b>要含第一列欄位名</b>）複製，貼進下面的框，按「畫出來」。<br>
+  資料只留在你這台電腦的瀏覽器裡，不會上傳到任何地方。</p>
+  <textarea id="src" placeholder="在這裡貼上（從 Google 試算表複製過來就好）"></textarea>
+  <div class="row">
+    <button type="button" id="btn-draw">畫出來</button>
+    <button type="button" class="ghost" id="btn-demo">先看範例資料</button>
+  </div>
+  <p class="tiny" id="msg">目前顯示的是範例資料。</p>
+
+  <div id="out"></div>
+
+  <footer>資料庫工作坊 · 科技轉型辦公室<br>這頁不用網路也能用：存起來，雙擊就開。</footer>
+</main>
+
+<script>
+function themeNow(){
+  var t = document.documentElement.getAttribute('data-theme');
+  return t ? t : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+function syncThemeBtn(){
+  var b = document.getElementById('theme');
+  if (b) b.textContent = themeNow() === 'dark' ? '淺色' : '深色';
+}
+(function(){
+  var b = document.getElementById('theme');
+  if (!b) return;
+  b.addEventListener('click', function(){
+    var t = themeNow() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('ws-theme', t); } catch (e) {}
+    syncThemeBtn();
+  });
+  syncThemeBtn();
+})();
+
+/* 全部用建立節點＋textContent 的方式組畫面，貼進來的資料一律當文字，不會被當成網頁語法執行。 */
+
+/* ---------- 範例資料（第一次打開先看得到東西）---------- */
+var DEMO = [
+  ['身分證（網址）','標題','媒體','發布時間','抓取時間','群組','標註'],
+  ['news.com/2081','首款摺疊手機發表 售價與亮點一次看','A 科技網','2026/09/17 07:10','2026/09/17 08:00','第12組','【科技】'],
+  ['news.com/2082','摺疊新機亮相 螢幕摺痕官方回應了','B 日報','2026/09/17 06:40','2026/09/17 08:00','第12組','【科技】'],
+  ['news.com/2083','八點檔新戲開拍 主演首度合體','C 娛樂網','2026/09/17 05:20','2026/09/17 08:00','','【演藝】【娛樂】'],
+  ['news.com/2084','摺疊機值得買嗎 外媒實測心得','E 週刊','2026/09/16 21:05','2026/09/17 08:00','第12組','【科技】'],
+  ['news.com/2085','金曲歌后宣布開唱 售票時間曝光','C 娛樂網','2026/09/16 18:30','2026/09/17 08:00','第14組','【演藝】'],
+  ['news.com/2086','歌后加場確定 粉絲擠爆售票網','G 影劇網','2026/09/16 17:50','2026/09/17 08:00','第14組','【演藝】'],
+  ['news.com/2045','中華隊逆轉勝 晉級複賽','D 新聞網','2026/09/16 12:00','2026/09/16 08:00','','【體育】'],
+  ['news.com/2046','央行利率維持不變 台股收紅','F 財經','2026/09/16 10:15','2026/09/16 08:00','','【財金】'],
+  ['news.com/2047','立法院三讀通過 新制明年上路','H 政經網','2026/09/16 09:40','2026/09/16 08:00','第9組','【政治】'],
+  ['news.com/2048','新制明年上路 影響哪些人一次看','B 日報','2026/09/16 09:10','2026/09/16 08:00','第9組','【政治】'],
+  ['news.com/2049','新制三讀 地方政府這樣說','I 電視台','2026/09/16 08:30','2026/09/16 08:00','第9組','【政治】'],
+  ['news.com/2050','流感疫苗十月開打 對象一次看','J 健康網','2026/09/15 16:20','2026/09/15 08:00','第7組','【健康】'],
+  ['news.com/2051','公費疫苗開打 醫師提醒這件事','K 醫藥網','2026/09/15 15:40','2026/09/15 08:00','第7組','【健康】'],
+  ['news.com/2052','音樂祭週末登場 交通管制看這裡','C 娛樂網','2026/09/15 14:00','2026/09/15 08:00','','【娛樂】'],
+  ['news.com/2053','半導體大廠擴廠 帶動就業','F 財經','2026/09/15 11:30','2026/09/15 08:00','','【財金】【科技】'],
+  ['news.com/2054','棒球經典賽名單出爐','D 新聞網','2026/09/15 10:00','2026/09/15 08:00','','【體育】'],
+  ['news.com/2055','綜藝天王宣布休息一年','G 影劇網','2026/09/14 20:10','2026/09/14 08:00','','【演藝】【娛樂】'],
+  ['news.com/2056','台股量縮 法人看後市','F 財經','2026/09/14 13:25','2026/09/14 08:00','','【財金】'],
+  ['news.com/2057','選舉倒數 各黨催票','H 政經網','2026/09/14 09:05','2026/09/14 08:00','','【政治】'],
+  ['news.com/2058','醫院流感專責門診加開','J 健康網','2026/09/14 08:40','2026/09/14 08:00','','【健康】']
+];
+
+/* ---------- 建立節點的小工具 ---------- */
+function el(tag, cls, text){
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined && text !== null) n.textContent = String(text);
+  return n;
+}
+var SVGNS = 'http://www.w3.org/2000/svg';
+function svg(tag, attrs, text){
+  var n = document.createElementNS(SVGNS, tag);
+  for (var k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = String(text);
+  return n;
+}
+
+/* ---------- 解析貼上的資料 ---------- */
+function parseTable(text){
+  var rows = text.replace(/\r/g, '').split('\n').filter(function(l){ return l.trim() !== ''; });
+  var sep = rows[0].indexOf('\t') >= 0 ? '\t' : ',';
+  return rows.map(function(l){
+    return l.split(sep).map(function(c){ return c.trim().replace(/^"|"$/g, ''); });
+  });
+}
+function colIndex(head, name){
+  for (var i = 0; i < head.length; i++) if (head[i].indexOf(name) >= 0) return i;
+  return -1;
+}
+function dayOf(s){
+  var m = String(s).match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+  return m ? (Number(m[2]) + '/' + Number(m[3])) : '';
+}
+function tagsOf(s){ return (String(s).match(/【[^】]+】/g) || []); }
+
+/* ---------- 圖 ---------- */
+function barList(items, hotFirst){
+  var box = document.createDocumentFragment();
+  var max = Math.max.apply(null, items.map(function(x){ return x[1]; }).concat([1]));
+  items.forEach(function(x, i){
+    var row = el('div', 'bar' + (hotFirst && i === 0 ? ' hot' : ''));
+    row.appendChild(el('span', null, x[0]));
+    var bar = el('i');
+    bar.style.width = Math.round(x[1] / max * 100) + '%';
+    row.appendChild(bar);
+    row.appendChild(el('b', null, x[1]));
+    box.appendChild(row);
+  });
+  return box;
+}
+function lineChart(points){
+  var w = 720, h = 190, pad = 30;
+  var max = Math.max.apply(null, points.map(function(p){ return p[1]; }).concat([1]));
+  var step = points.length > 1 ? (w - pad * 2) / (points.length - 1) : 0;
+  var root = svg('svg', { viewBox: '0 0 ' + w + ' ' + h, role: 'img', 'aria-label': '每天新增則數' });
+  root.appendChild(svg('line', { x1: pad, y1: h - 34, x2: w - pad, y2: h - 34, stroke: 'var(--line)', 'stroke-width': 1 }));
+  var d = '';
+  points.forEach(function(p, i){
+    var x = pad + i * step, y = h - 34 - (p[1] / max) * (h - 70);
+    d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+  });
+  root.appendChild(svg('path', { d: d.trim(), fill: 'none', stroke: 'var(--brand)', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+  points.forEach(function(p, i){
+    var x = pad + i * step, y = h - 34 - (p[1] / max) * (h - 70);
+    root.appendChild(svg('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: 4, fill: 'var(--accent)' }));
+    root.appendChild(svg('text', { x: x.toFixed(1), y: (y - 11).toFixed(1), 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--muted)' }, p[1]));
+    root.appendChild(svg('text', { x: x.toFixed(1), y: h - 10, 'text-anchor': 'middle', 'font-size': 12, fill: 'var(--faint)' }, p[0]));
+  });
+  return root;
+}
+function kpi(k, v, unit, isDate){
+  var box = el('div', 'kpi');
+  box.appendChild(el('div', 'k', k));
+  var val = el('div', 'v' + (isDate ? ' date' : ''), v);
+  if (unit) val.appendChild(el('small', null, unit));
+  box.appendChild(val);
+  return box;
+}
+function section(title, node){
+  var frag = document.createDocumentFragment();
+  frag.appendChild(el('h2', null, title));
+  var card = el('div', 'card');
+  card.appendChild(node);
+  frag.appendChild(card);
+  return frag;
+}
+
+/* ---------- 主流程 ---------- */
+function render(rows){
+  var head = rows[0], body = rows.slice(1);
+  var out = document.getElementById('out');
+  out.replaceChildren();
+
+  var iTitle = colIndex(head, '標題'), iMedia = colIndex(head, '媒體');
+  var iGrp = colIndex(head, '群組'), iTag = colIndex(head, '標註');
+  var iGot = colIndex(head, '抓取時間'), iPub = colIndex(head, '發布時間');
+  if (iTitle < 0) {
+    document.getElementById('msg').textContent = '找不到「標題」這一欄，請確認有複製到第一列的欄位名。';
+    return;
+  }
+
+  var byTag = {}, byMedia = {}, byDay = {}, byGrp = {};
+  body.forEach(function(r){
+    tagsOf(r[iTag]).forEach(function(t){ byTag[t] = (byTag[t] || 0) + 1; });
+    if (iMedia >= 0 && r[iMedia]) byMedia[r[iMedia]] = (byMedia[r[iMedia]] || 0) + 1;
+    var d = dayOf(r[iGot >= 0 ? iGot : iPub]);
+    if (d) byDay[d] = (byDay[d] || 0) + 1;
+    if (iGrp >= 0 && r[iGrp]) {
+      var g = byGrp[r[iGrp]];
+      if (!g) g = byGrp[r[iGrp]] = { n: 0, title: r[iTitle], media: [], tag: r[iTag] || '' };
+      g.n++;
+      if (iMedia >= 0 && r[iMedia] && g.media.indexOf(r[iMedia]) < 0) g.media.push(r[iMedia]);
+    }
+  });
+  var sorted = function(o){
+    return Object.keys(o).map(function(k){ return [k, o[k]]; }).sort(function(a, b){ return b[1] - a[1]; });
+  };
+  var tagList = sorted(byTag), mediaList = sorted(byMedia).slice(0, 8);
+  var dayList = Object.keys(byDay).sort(function(a, b){
+    var pa = a.split('/').map(Number), pb = b.split('/').map(Number);
+    return pa[0] - pb[0] || pa[1] - pb[1];
+  }).map(function(k){ return [k, byDay[k]]; });
+  var grpList = Object.keys(byGrp).map(function(k){ return byGrp[k]; })
+    .filter(function(g){ return g.n >= 2; })
+    .sort(function(a, b){ return b.n - a.n; }).slice(0, 5);
+
+  var kpis = el('div', 'kpis');
+  kpis.appendChild(kpi('總共存了', body.length, '筆'));
+  kpis.appendChild(kpi('分類', tagList.length, '類'));
+  kpis.appendChild(kpi('同一件事', grpList.length, '組'));
+  kpis.appendChild(kpi('最近一次抓取', dayList.length ? dayList[dayList.length - 1][0] : '—', null, true));
+  out.appendChild(kpis);
+
+  var hot = grpList.filter(function(g){ return g.media.length >= 3; });
+  if (hot.length) {
+    out.appendChild(el('p', 'alert', '▲ 延燒中：「' + hot[0].title + '」24 小時內被 ' + hot[0].media.length + ' 家媒體報導'));
+  }
+  if (dayList.length) out.appendChild(section('每天新增幾則', lineChart(dayList)));
+  if (tagList.length) out.appendChild(section('各分類幾則', barList(tagList, true)));
+  if (mediaList.length) out.appendChild(section('哪家媒體報最多', barList(mediaList)));
+  if (grpList.length) {
+    var box = el('div');
+    grpList.forEach(function(g){
+      var row = el('div', 'grp');
+      row.appendChild(el('div', 't', g.title));
+      var meta = el('div', 'm');
+      meta.appendChild(el('span', 'n', g.n + ' 則'));
+      meta.appendChild(document.createTextNode('｜' + g.media.join('、') + (g.tag ? '｜' + g.tag : '')));
+      row.appendChild(meta);
+      box.appendChild(row);
+    });
+    out.appendChild(section('同一件事，被幾家報導', box));
+  }
+}
+function draw(){
+  var t = document.getElementById('src').value.trim();
+  var msg = document.getElementById('msg');
+  if (!t) { msg.textContent = '框裡是空的，先去試算表複製資料，或按「先看範例資料」。'; return; }
+  var rows = parseTable(t);
+  if (rows.length < 2) { msg.textContent = '只看到一列，請把整張表連同第一列欄位名一起複製。'; return; }
+  msg.textContent = '畫的是你貼上的 ' + (rows.length - 1) + ' 筆資料。';
+  render(rows);
+}
+function demo(){
+  document.getElementById('msg').textContent = '目前顯示的是範例資料。';
+  render(DEMO);
+}
+document.getElementById('btn-draw').addEventListener('click', draw);
+document.getElementById('btn-demo').addEventListener('click', demo);
+demo();
+</script>
+</body>
+</html>

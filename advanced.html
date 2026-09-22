@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>資料庫工作坊｜進階包</title>
+<script>try{var t=localStorage.getItem('ws-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{--bg:#FBF9F3;--ink:#1A2333;--brand:#18499E;--brand-soft:#E8EDF6;--accent:#E2622C;--accent-soft:#FBEDE5;
+--muted:#6E7480;--faint:#9AA0AA;--line:#DED7C9;--line-soft:#EBE5D9;--card:#FFF;--sheet:#F2EFE6;--ok:#2F7D5B;--risk:#C0392B;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161E;--ink:#E7EAF0;--brand:#8AAEEB;--brand-soft:#1C2941;--accent:#F0875A;--accent-soft:#3A241A;
+--muted:#A3A9B4;--faint:#7A818D;--line:#2D3441;--line-soft:#232A35;--card:#181D27;--sheet:#1D232E;--ok:#62C295;--risk:#F07F72;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161E;--ink:#E7EAF0;--brand:#8AAEEB;--brand-soft:#1C2941;--accent:#F0875A;--accent-soft:#3A241A;
+--muted:#A3A9B4;--faint:#7A818D;--line:#2D3441;--line-soft:#232A35;--card:#181D27;--sheet:#1D232E;--ok:#62C295;--risk:#F07F72;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+font-size:17px;line-height:1.75;padding:0 0 64px}
+.top .wrap{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.theme-btn{flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px;font-weight:700;padding:9px 15px;min-height:40px;cursor:pointer;font-family:inherit}
+.theme-btn:hover{border-color:var(--brand);color:var(--brand)}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+header.top{border-bottom:1px solid var(--line);background:var(--bg);padding:26px 0 20px;margin-bottom:22px}
+.kicker{font-size:12px;letter-spacing:.2em;font-weight:700;color:var(--accent)}
+h1{font-size:28px;line-height:1.3;margin-top:8px}
+h2{font-size:21px;margin:30px 0 10px;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:18px 0 6px}
+h4,h5{font-size:16px;margin:14px 0 6px}
+p{margin:10px 0}
+ul,ol{margin:10px 0 10px 1.4em}
+li{margin:5px 0}
+a{color:var(--brand)}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0}
+blockquote{border-left:3px solid var(--accent);background:var(--sheet);padding:12px 16px;margin:14px 0;color:var(--muted);font-size:15px}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;background:var(--sheet);padding:.1em .35em;font-size:.92em;overflow-wrap:anywhere}
+pre.code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;background:var(--sheet);border:1px solid var(--line-soft);
+padding:12px 14px;margin:12px 0;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.scroll-x{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);font-size:15px}
+th,td{border-bottom:1px solid var(--line-soft);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.6}
+th{background:var(--sheet);color:var(--muted);font-size:13px;letter-spacing:.06em}
+tr:last-child td{border-bottom:0}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 16px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:15px;font-weight:700;padding:11px 14px;cursor:pointer;font-family:inherit;min-height:48px;flex:1 1 auto;min-width:130px}
+.tab.is-on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.panel{display:none}
+.panel.is-on{display:block}
+.panel h2{margin-top:0;border-top:0;padding-top:0}
+.shot{padding:20px 20px 4px}
+.shot-in{position:relative;line-height:0}
+.shot img{width:100%;display:block;border:1px solid var(--line)}
+.mk{position:absolute;border:3px solid var(--accent);border-radius:4px;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
+.mkno{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 2px 5px rgba(0,0,0,.35)}
+@media(max-width:640px){.shot{padding:17px 17px 4px}.mkno{width:22px;height:22px;font-size:12px}}
+.pin-list{margin:12px 0 0 1.5em;font-size:15px;line-height:1.7;color:var(--ink)}
+.pin-list li{margin:4px 0}
+.fig{background:var(--card);border:1px solid var(--line);padding:10px 12px;margin:10px 0}
+.fig svg{width:100%;height:auto;display:block}
+.fig .cap{font-size:13px;color:var(--faint);margin-top:6px}
+.step{background:var(--card);border:1px solid var(--line);padding:16px 18px;margin:12px 0;display:flex;gap:14px;align-items:flex-start}
+.step .n{font-size:26px;font-weight:700;color:var(--accent);line-height:1.1;flex:none;width:38px}
+.step .t{font-weight:700}
+.step .d{color:var(--muted);font-size:15px;margin-top:4px}
+.btn{display:block;width:100%;border:0;background:var(--brand);color:#fff;font-size:18px;font-weight:700;
+padding:16px;margin:12px 0;cursor:pointer;font-family:inherit;min-height:56px}
+.btn.alt{background:var(--accent)}
+.btn:active{opacity:.85}
+.btn.done{background:var(--ok)}
+.alert{background:var(--accent-soft);color:var(--accent);border-left:3px solid var(--accent);padding:12px 16px;margin:14px 0;font-weight:700}
+.tiny{font-size:13px;color:var(--faint);margin:8px 0}
+details{border:1px solid var(--line);background:var(--card);padding:12px 16px;margin:12px 0}
+summary{cursor:pointer;font-weight:700;color:var(--brand)}
+details[open] summary{margin-bottom:10px}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--faint)}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<div><p class="kicker">選修 · 一次看一條路</p><h1>資料庫工作坊｜進階包</h1></div>
+<button type="button" class="theme-btn" id="theme">深色</button>
+</div></header>
+<main class="wrap">
+<p>課堂上那三個動作已經夠用，這四條不急。前三條回去自己就能試，不用申請、不用錢；第四條要走公司管道，原因寫在第四頁。</p><div class="tabs" role="tablist"><button type="button" class="tab" role="tab">① QUERY</button><button type="button" class="tab" role="tab">② 挑資料</button><button type="button" class="tab" role="tab">③ clasp</button><button type="button" class="tab" role="tab">④ AI 補欄</button></div><section class="panel"><h2>① QUERY：一句話查一張表</h2><div class="fig"><svg viewBox="0 0 640 250" role="img" aria-label="整張表經過條件篩選，只留符合的列">
+<text x="20" y="34" font-size="24" font-weight="700" fill="var(--muted)">整張表</text>
+<rect x="20" y="48" width="190" height="34" fill="var(--sheet)" stroke="var(--line)" stroke-width="2"/>
+<rect x="20" y="82" width="190" height="34" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+<rect x="20" y="116" width="190" height="34" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+<rect x="20" y="150" width="190" height="34" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+<rect x="20" y="184" width="190" height="34" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+<path d="M232 130 h150 m-30 -18 l30 18 l-30 18" fill="none" stroke="var(--accent)" stroke-width="5"/>
+<text x="306" y="112" text-anchor="middle" font-size="24" font-weight="700" fill="var(--accent)">where</text>
+<text x="306" y="176" text-anchor="middle" font-size="22" fill="var(--muted)">條件</text>
+<text x="404" y="34" font-size="24" font-weight="700" fill="var(--brand)">只留符合的</text>
+<rect x="404" y="48" width="216" height="34" fill="var(--sheet)" stroke="var(--line)" stroke-width="2"/>
+<rect x="404" y="82" width="216" height="34" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/>
+<rect x="404" y="116" width="216" height="34" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/>
+<text x="404" y="202" font-size="22" fill="var(--muted)">select＝要哪幾欄</text>
+<text x="404" y="232" font-size="22" fill="var(--muted)">order by＝怎麼排</text>
+</svg></div><p>試算表內建的函式，不用寫程式。我們的「查詢」分頁，背後就是它。</p>
+<p><b>查詢句只有四個字</b></p>
+<div class="scroll-x"><table>
+<tr><th>字</th><th>意思</th></tr>
+<tr><td>select</td><td>要哪幾欄</td></tr>
+<tr><td>where</td><td>條件</td></tr>
+<tr><td>order by</td><td>怎麼排</td></tr>
+<tr><td>limit</td><td>只要前幾筆</td></tr></table></div>
+<pre class="code">=QUERY(資料!A:D, "select A,B,C where B contains '颱風' order by A desc", 1)</pre>
+<p><b>三個最常卡的</b></p>
+<ul><li>欄位要用 A、B、C，不能用中文欄名</li><li>文字條件用單引號：<code>contains '颱風'</code></li><li>最後那個 <code>1</code> 是「第一列是欄位名」，漏掉會被當成資料</li></ul></section><section class="panel"><h2>② filter 和 reduce：用程式挑資料</h2><div class="fig"><svg viewBox="0 0 640 230" role="img" aria-label="filter 挑出符合的，reduce 全部加起來">
+<text x="20" y="34" font-size="24" font-weight="700" fill="var(--muted)">每一列</text>
+<g fill="var(--card)" stroke="var(--line)" stroke-width="2">
+<rect x="20" y="52" width="46" height="46"/><rect x="72" y="52" width="46" height="46"/><rect x="124" y="52" width="46" height="46"/>
+<rect x="20" y="104" width="46" height="46"/><rect x="72" y="104" width="46" height="46"/><rect x="124" y="104" width="46" height="46"/>
+</g>
+<path d="M192 100 h92 m-24 -16 l24 16 l-24 16" fill="none" stroke="var(--accent)" stroke-width="5"/>
+<text x="238" y="80" text-anchor="middle" font-size="24" font-weight="700" fill="var(--accent)">filter</text>
+<text x="238" y="146" text-anchor="middle" font-size="22" fill="var(--muted)">挑出符合的</text>
+<g fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2">
+<rect x="300" y="52" width="46" height="46"/><rect x="300" y="104" width="46" height="46"/>
+</g>
+<path d="M368 100 h92 m-24 -16 l24 16 l-24 16" fill="none" stroke="var(--brand)" stroke-width="5"/>
+<text x="414" y="80" text-anchor="middle" font-size="24" font-weight="700" fill="var(--brand)">reduce</text>
+<text x="414" y="146" text-anchor="middle" font-size="22" fill="var(--muted)">全部加起來</text>
+<rect x="476" y="66" width="150" height="68" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/>
+<text x="551" y="110" text-anchor="middle" font-size="30" font-weight="700" fill="var(--brand)">25,900</text>
+<text x="476" y="176" font-size="22" fill="var(--muted)">一個數字</text>
+</svg></div><p>Apps Script 裡最常用的兩個動作。看得懂這兩個，大部分的程式都看得懂。</p>
+<ul><li><b>filter</b>：從一堆裡面挑出符合條件的</li><li><b>reduce</b>：把一堆數字全部加起來</li></ul>
+<pre class="code">const 命中 = 資料.filter(r =&gt; String(r[1]).includes('颱風'));
+Logger.log(命中.length + ' 則');</pre>
+<p>貼進 Apps Script，函式選這一個，按執行，看下面的「執行記錄」。</p>
+<p><b>提醒</b>：<code>r[1]</code> 是第 2 欄（從 0 開始數）。欄位順序改了，這個數字也要改——這就是課堂上說「欄位要固定」的原因。</p></section><section class="panel"><h2>③ clasp：不用複製貼上</h2><div class="fig"><svg viewBox="0 0 640 250" role="img" aria-label="在電腦改程式，一行指令推上 Google">
+<text x="135" y="28" text-anchor="middle" font-size="24" font-weight="700" fill="var(--muted)">你的電腦</text>
+<rect x="20" y="40" width="230" height="130" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+<g stroke="var(--line-soft)" stroke-width="8" stroke-linecap="round">
+<path d="M44 74 h150"/><path d="M44 100 h110"/><path d="M44 126 h170"/><path d="M44 152 h90"/>
+</g>
+<path d="M268 104 h110 m-28 -18 l28 18 l-28 18" fill="none" stroke="var(--accent)" stroke-width="5"/>
+<text x="323" y="84" text-anchor="middle" font-size="24" font-weight="700" fill="var(--accent)">clasp push</text>
+<text x="508" y="28" text-anchor="middle" font-size="24" font-weight="700" fill="var(--brand)">Google 試算表</text>
+<rect x="396" y="40" width="224" height="130" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/>
+<text x="508" y="115" text-anchor="middle" font-size="26" font-weight="700" fill="var(--brand)">程式就上去了</text>
+<path d="M18 208 l116 -26 M134 208 l-116 -26" stroke="var(--risk)" stroke-width="5"/>
+<text x="20" y="218" font-size="24" font-weight="700" fill="var(--risk)">複製貼上</text>
+<text x="152" y="218" font-size="23" fill="var(--muted)">不用手動貼，也不會貼錯位置</text>
+</svg></div><p>在自己電腦上改程式，一行指令推上 Google。要有 Node.js 22 以上、會開終端機。</p>
+<pre class="code">npm install -g @google/clasp
+clasp login
+clasp clone-script 〈專案 ID〉
+clasp push</pre>
+<p>安裝完、登入前，要先到 script.google.com/home/usersettings 打開「Google Apps Script API」。專案 ID 在 Apps Script 編輯器左邊的「專案設定」。</p>
+<p><b>三個注意</b></p>
+<ul><li><code>clone-script</code> 是新版指令，舊版叫 <code>clone</code>，兩種都能用</li><li>登入憑證存在你的使用者資料夾，不要上傳或給別人</li><li><code>push</code> 會覆蓋線上版本，改之前先 <code>pull</code></li></ul></section><section class="panel"><h2>④ AI 幫每一列補一個欄位</h2><div class="fig"><svg viewBox="0 0 640 250" role="img" aria-label="多開一欄讓 AI 一列一列填">
+<rect x="20" y="30" width="600" height="46" fill="var(--sheet)" stroke="var(--line)" stroke-width="2"/>
+<text x="40" y="60" font-size="23" font-weight="700" fill="var(--muted)">標題</text>
+<text x="340" y="60" font-size="23" font-weight="700" fill="var(--accent)">AI 補的欄</text>
+<g stroke="var(--line)" stroke-width="2" fill="var(--card)">
+<rect x="20" y="76" width="300" height="46"/><rect x="20" y="122" width="300" height="46"/><rect x="20" y="168" width="300" height="46"/>
+</g>
+<g stroke="var(--line-soft)" stroke-width="8" stroke-linecap="round">
+<path d="M44 100 h240"/><path d="M44 146 h200"/><path d="M44 192 h250"/>
+</g>
+<g stroke="var(--accent)" stroke-width="2" fill="var(--accent-soft)">
+<rect x="320" y="76" width="300" height="46"/><rect x="320" y="122" width="300" height="46"/><rect x="320" y="168" width="300" height="46"/>
+</g>
+<text x="340" y="106" font-size="23" fill="var(--accent)">售票資訊、正面</text>
+<text x="340" y="152" font-size="23" fill="var(--accent)">金額 25 萬、截止 9/30</text>
+<text x="340" y="198" font-size="23" fill="var(--accent)">需要回應</text>
+<text x="20" y="240" font-size="23" font-weight="700" fill="var(--risk)">要金鑰、要錢、答案不保證一樣</text>
+</svg></div><p>多開一欄，讓 AI 一列一列填：一句話摘要、正面負面、或從一段文字抽出金額和截止日。最後這個最有價值——原本只能讀的東西，變成可以排序、篩選、加總。</p>
+<p><b>為什麼今天不教</b></p>
+<ul><li>要申請金鑰、要綁付款，多數人會卡在這一步</li><li>每一列都要送一次，量大會慢也會產生費用</li><li>同一筆跑兩次答案可能不一樣，跟資料庫「結果要穩定」衝突</li><li>跟課堂那條「機敏資料不要貼進 AI」牴觸</li></ul>
+<p><b>想做的話</b>：填 AI 需求申請單 m.aiurl.tw/5qrdo，寫清楚要補哪一欄、資料有沒有機敏內容、多久跑一次。</p>
+<p><b>不管誰做都守這條</b>：AI 產出的先寫進「暫存」分頁，人看過再併回正式表。</p></section>
+<footer>資料庫工作坊 · 科技轉型辦公室 · 產生於 2026-09-22<br>這頁用電腦開也一樣，內容完全相同。</footer>
+</main>
+<script>
+(function(){
+  var tabs = [].slice.call(document.querySelectorAll('.tab'));
+  var panels = [].slice.call(document.querySelectorAll('.panel'));
+  if (!tabs.length) return;
+  function show(i){
+    tabs.forEach(function(t, k){ t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
+    panels.forEach(function(p, k){ p.classList.toggle('is-on', k === i); });
+  }
+  tabs.forEach(function(t, i){ t.addEventListener('click', function(){ show(i); window.scrollTo(0, 0); }); });
+  show(0);
+})();
+
+function themeNow(){
+  var t = document.documentElement.getAttribute('data-theme');
+  return t ? t : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+function syncThemeBtn(){
+  var b = document.getElementById('theme');
+  if (b) b.textContent = themeNow() === 'dark' ? '淺色' : '深色';
+}
+(function(){
+  var b = document.getElementById('theme');
+  if (!b) return;
+  b.addEventListener('click', function(){
+    var t = themeNow() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('ws-theme', t); } catch (e) {}
+    syncThemeBtn();
+  });
+  syncThemeBtn();
+})();
+function copyText(id, btn){
+  var el = document.getElementById(id);
+  var t = el.textContent;
+  function ok(){
+    var o = btn.getAttribute('data-label') || btn.textContent;
+    btn.setAttribute('data-label', o);
+    btn.textContent = '已複製，去貼上';
+    btn.classList.add('done');
+    setTimeout(function(){ btn.textContent = o; btn.classList.remove('done'); }, 2500);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(t).then(ok, function(){ fallback(t, ok); });
+  } else {
+    fallback(t, ok);
+  }
+}
+function fallback(t, ok){
+  var ta = document.createElement('textarea');
+  ta.value = t;
+  ta.style.position = 'fixed';
+  ta.style.opacity = 0;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); ok(); }
+  catch (e) { window.alert('這個瀏覽器不給自動複製，請展開下面的內容自己長按複製'); }
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
