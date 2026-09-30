@@ -60,7 +60,7 @@ tr:last-child td{border-bottom:0}
 .step .n{font-size:26px;font-weight:700;color:var(--accent);line-height:1.1;flex:none;width:38px}
 .step .t{font-weight:700}
 .step .d{color:var(--muted);font-size:15px;margin-top:4px}
-.btn{display:block;width:100%;border:0;background:var(--brand);color:#fff;font-size:18px;font-weight:700;
+.btn{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;width:100%;border:0;background:var(--brand);color:#fff;font-size:18px;font-weight:700;
 padding:16px;margin:12px 0;cursor:pointer;font-family:inherit;min-height:56px}
 .btn.alt{background:var(--accent)}
 .btn:active{opacity:.85}
@@ -146,6 +146,8 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 <h2>想改成自己部門要的</h2>
 <p>複製下面這段，貼進 ChatGPT、Gemini 或 Claude 的新對話，它會一題一題問你，最後給你可以直接貼上的東西。</p>
 <button class="btn alt" type="button" onclick="copyText('prompt', this)">② 複製「資料追蹤小幫手」prompt</button>
+<a class="btn alt" href="https://drive.google.com/file/d/1g_ROxuPQBKvHJuo06K-YQ7dVlzSIJklj/view?usp=sharing" target="_blank" rel="noopener">③ 下載 grill me 資料庫 Skill</a>
+<p class="tiny">②和③內容一樣：②是直接複製文字，③是下載檔案。用 Claude 或 ChatGPT 可以把檔案直接拉進對話框。</p>
 
 <details><summary>完整安裝步驟（卡住的時候打開）</summary><h2>示範成品安裝步驟：複製、貼上、按執行</h2>
 <blockquote>需要：一個個人 Gmail、一台電腦（手機打不開 Apps Script 的編輯器）。 全程約 3 分鐘。</blockquote>
@@ -177,8 +179,10 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 <tr><td>按到「部署」，跳出「管理部署作業」</td><td>按「取消」就好，setup 不用部署（網頁儀表板才會用到）</td></tr>
 <tr><td>勾了沒反應</td><td>確認跑過 setup、按過「允許」；看狀態列有沒有顯示錯誤</td></tr>
 <tr><td>想改抓什麼</td><td>改「設定」分頁的分類表或時間區間，不用碰程式</td></tr>
+<tr><td>某一類的則數一直卡在 100</td><td>Google 新聞一次最多給 100 則。把大分類拆細（政治→選舉、議會、外交），或把天數縮短，一次抓少一點、抓勤一點</td></tr>
+<tr><td>打「正午新聞」卻抓到「午間新聞」</td><td>搜尋是「差不多就算」，會自動找相近的詞。要一模一樣，就在詞的前後加英文引號："正午新聞"</td></tr>
 <tr><td>想每天自動抓</td><td>勾「每天早上 8 點自動抓」</td></tr>
-<tr><td>想換資料來源</td><td>在 Code.gs 裡按 Ctrl+F 搜「【可客製】」，只改那一段</td></tr>
+<tr><td>想換資料來源</td><td>在 Code.gs 裡按 Ctrl+F 搜「【可客製】」，只改兩格：來源網址、要抓的項目</td></tr>
 <tr><td>想整個重來</td><td>刪掉「資料」分頁第 2 列以下（表頭留著），再勾「立刻抓」</td></tr></table></div></details>
 <details><summary>看一下程式長什麼樣</summary><pre class="code" id="code">/** @OnlyCurrentDoc */
 /**
@@ -192,7 +196,7 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
  * 之後要抓：到「設定」分頁，勾「立刻抓」。
  *
  * 想改抓什麼 → 改「設定」分頁就好，不用碰程式。
- * 想換資料來源 → 按 Ctrl+F 搜「【可客製】」，只改那一段。
+ * 想換資料來源 → 按 Ctrl+F 搜「【可客製】」，只改那裡的兩格：網址、要抓哪些項目。
  */
 
 // ============================================================
@@ -277,36 +281,61 @@ const COLORS = {
   muted: '#6B6B6B',
 };
 
-// ===== 【可客製】抓取：想換資料來源，只改這一段 =====
-// 不管從哪裡抓，最後都要整理成一樣的格式，交給下一步：
-//   { id: 網址（身分證）, title: 標題, source: 媒體, published: 發布時間（Date） }
+// ============================================================
+// ===== 【可客製】只改下面兩格，其他一個字都不用動 =====
+// ============================================================
 
-/** 把一類的相關字，組成 Google 新聞的搜尋網址 */
+// ① 要抓哪裡：把來源網址貼進來
+//    網址裡寫 {關鍵字} 的地方，會自動換成「設定」分頁分類表裡的字。
+//    如果來源不用關鍵字（例如某家媒體的 RSS），就貼固定網址、不要寫 {關鍵字}，會整包收下來。
+const 來源網址 = 'https://news.google.com/rss/search?q={關鍵字}&amp;hl=zh-TW&amp;gl=TW&amp;ceid=TW:zh-Hant';
+
+// ② 要抓哪些項目：左邊是你表格的欄位，右邊是來源資料裡的標籤名
+//    不知道標籤名怎麼看：用瀏覽器打開來源網址，會看到 &lt;title&gt;、&lt;link&gt; 這種東西，那就是標籤名。
+const 要抓的項目 = {
+  身分證: 'link',      // 每一筆專屬的網址，重複就是靠它認出來的
+  標題: 'title',
+  媒體: 'source',     // 來源沒有這個標籤就留空字串 ''
+  時間: 'pubDate',
+};
+
+// 「要抓幾天內」不用改這裡，去「設定」分頁改就好。
+
+// ============================================================
+// ===== 【可客製】結束，以下是機器在做的事，不用看懂 =====
+// ============================================================
+
+/** 把一類的相關字塞進來源網址 */
 function buildFeedUrl_(words, days) {
+  if (來源網址.indexOf('{關鍵字}') &lt; 0) return 來源網址; // 固定網址的來源，整包收下
   const terms = words.map((w) =&gt; (w.indexOf(' ') &gt;= 0 ? '"' + w + '"' : w));
   const query = '(' + terms.join(' OR ') + ') when:' + days + 'd';
-  return 'https://news.google.com/rss/search?q=' + encodeURIComponent(query) +
-    '&amp;hl=zh-TW&amp;gl=TW&amp;ceid=TW:zh-Hant';
+  return 來源網址.replace('{關鍵字}', encodeURIComponent(query));
 }
 
-/** 把 Google 新聞回傳的內容（RSS），拆成一筆一筆 */
+/** 把來源回傳的內容（RSS），照②的對照表拆成一筆一筆 */
 function parseFeed_(xml) {
   const blocks = xml.match(/&lt;item&gt;[\s\S]*?&lt;\/item&gt;/g) || [];
   const items = [];
   blocks.forEach((block) =&gt; {
-    const link = pickTag_(block, 'link');
-    const source = pickTag_(block, 'source');
-    let title = pickTag_(block, 'title');
-    const suffix = ' - ' + source; // Google 新聞的標題後面會接「 - 媒體名」，拿掉
+    const id = pickTag_(block, 要抓的項目.身分證);
+    const source = 要抓的項目.媒體 ? pickTag_(block, 要抓的項目.媒體) : '';
+    let title = pickTag_(block, 要抓的項目.標題);
+    const suffix = ' - ' + source; // 有些來源的標題後面會接「 - 媒體名」，拿掉
     if (source &amp;&amp; title.endsWith(suffix)) title = title.slice(0, -suffix.length);
-    if (link &amp;&amp; title) {
-      items.push({ id: link, title: title, source: source, published: new Date(pickTag_(block, 'pubDate')) });
+    if (id &amp;&amp; title) {
+      items.push({
+        id: id,
+        title: title,
+        source: source,
+        published: new Date(pickTag_(block, 要抓的項目.時間)),
+      });
     }
   });
   return items;
 }
 
-/** 每一類各搜一次，一次同時送出 */
+/** 每一類各抓一次，一次同時送出 */
 function fetchAll_(categories, days) {
   const requests = categories.map((c) =&gt; ({ url: buildFeedUrl_(c.words, days), muteHttpExceptions: true }));
   const responses = UrlFetchApp.fetchAll(requests);
@@ -316,7 +345,6 @@ function fetchAll_(categories, days) {
     return { category: c.name, items: parseFeed_(res.getContentText('UTF-8')), failed: false };
   });
 }
-// ===== 【可客製】結束 =====
 
 // ============================================================
 // 三、整理資料：② 認身分證 → ③ 分群組 → ④ 貼標註
@@ -797,7 +825,7 @@ function formatTime_(ss, date) {
 <h2>想再往前一步</h2>
 <p>QUERY、filter／reduce、clasp、AI 補欄：看<a href="advanced.html">進階包</a>。課堂上那三個動作已經夠用，這四條不急。</p>
 
-<footer>資料庫工作坊 · 科技轉型辦公室 · 產生於 2026-09-22<br>這頁用電腦開也一樣，內容完全相同。</footer>
+<footer>資料庫工作坊 · 科技轉型辦公室 · 產生於 2026-09-30<br>這頁用電腦開也一樣，內容完全相同。</footer>
 </main>
 <script>
 (function(){
