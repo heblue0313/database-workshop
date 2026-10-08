@@ -82,11 +82,11 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 
 <p>課堂上做的三個動作，全部在這裡。用電腦做；手機可以先看，回家再做。</p>
 
-<div class="step"><div class="n">01</div><div><div class="t">複製程式</div><div class="d">按下面那顆藍色的按鈕。</div></div></div>
-<button class="btn" type="button" onclick="copyText('code', this)">① 複製程式</button>
+<div class="step"><div class="n">01</div><div><div class="t">複製 PROMPT，貼給 AI</div><div class="d">按下面那顆藍色的按鈕，貼進 ChatGPT、Gemini 或 Claude 的新對話送出。照它問的一題一題回答，最後它會給你一份完整程式。</div></div></div>
+<button class="btn" type="button" onclick="copyText('prompt', this)">點我複製 PROMPT</button>
 
 <div class="step"><div class="n">02</div><div><div class="t">貼上</div>
-<div class="d">打開 <a href="https://sheets.new">sheets.new</a>，上方選單「擴充功能」→「Apps Script」。編輯器打開後，左邊點「程式碼.gs」，右邊整片全選刪掉，再貼上、儲存。</div></div></div>
+<div class="d">把 AI 給你的程式貼進去：打開 <a href="https://sheets.new">sheets.new</a>，上方選單「擴充功能」→「Apps Script」。編輯器打開後，左邊點「程式碼.gs」，右邊整片全選刪掉，再貼上、儲存。</div></div></div>
 <div class="fig"><svg viewBox="0 0 640 300" role="img" aria-label="在擴充功能選單裡選 Apps Script">
 <rect x="2" y="2" width="636" height="296" rx="4" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
 <rect x="2" y="2" width="636" height="46" fill="var(--sheet)"/>
@@ -143,11 +143,11 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 
 <p class="alert">setup 這一步不用部署，不要按右上角藍色的「部署」。</p>
 
-<h2>想改成自己部門要的</h2>
-<p>複製下面這段，貼進 ChatGPT、Gemini 或 Claude 的新對話，它會一題一題問你，最後給你可以直接貼上的東西。</p>
-<button class="btn alt" type="button" onclick="copyText('prompt', this)">② 複製「資料追蹤小幫手」prompt</button>
-<a class="btn alt" href="https://drive.google.com/file/d/1g_ROxuPQBKvHJuo06K-YQ7dVlzSIJklj/view?usp=sharing" target="_blank" rel="noopener">③ 下載 grill me 資料庫 Skill</a>
-<p class="tiny">②和③內容一樣：②是直接複製文字，③是下載檔案。用 Claude 或 ChatGPT 可以把檔案直接拉進對話框。</p>
+<h2>備用</h2>
+<p>AI 說「程式太長，我們改用兩段貼法」時，按這顆複製骨架程式：先貼骨架，再照 AI 的說明貼分類表。</p>
+<button class="btn alt" type="button" onclick="copyText('code', this)">一鍵複製程式（兩段貼法才用）</button>
+<a class="btn alt" href="https://drive.google.com/file/d/1g_ROxuPQBKvHJuo06K-YQ7dVlzSIJklj/view?usp=sharing" target="_blank" rel="noopener">下載 grill me 資料庫 Skill</a>
+<p class="tiny">還沒想好哪件事值得做成資料庫，先用 grill me Skill 理清楚。用 Claude 或 ChatGPT 可以把檔案直接拉進對話框。</p>
 
 <details><summary>完整安裝步驟（卡住的時候打開）</summary><h2>示範成品安裝步驟：複製、貼上、按執行</h2>
 <blockquote>需要：一個個人 Gmail、一台電腦（手機打不開 Apps Script 的編輯器）。 全程約 3 分鐘。</blockquote>
@@ -728,104 +728,709 @@ function decodeEntities_(s) {
 function formatTime_(ss, date) {
   return Utilities.formatDate(date, ss.getSpreadsheetTimeZone(), 'M/d HH:mm');
 }
+
+// ===== 程式結尾（看到這一行才算貼完整）=====
 </pre></details>
-<details><summary>看一下 prompt 的內容</summary><pre class="code" id="prompt">你是「資料追蹤小幫手」，一個有耐心的同事。你要幫我把一件「想每天自動收集的資料」問清楚，然後產出可以直接貼進 Google 試算表的東西。我不是工程師，請用白話，專有名詞放在括號裡。
+<details><summary>看一下 prompt 的內容</summary><pre class="code" id="prompt">你是「資料追蹤小幫手」，一個有耐心的同事。你要幫我把一件「想每天自動收集的網路資料」問清楚，然後交給我一份完整、可以直接貼進 Google 試算表的程式，並帶著我貼上、執行、排錯。我不是工程師，請用白話，專有名詞放在括號裡。
 
 【你要先知道的背景】
-我已經在 Google 試算表裝好一份「會自己長大的資料庫」程式，它的做法是固定的：
-- 「設定」分頁有一張分類表，每一列是「分類｜相關字（用頓號隔開）」。程式用相關字去抓資料，抓回來再貼上【分類】標註。
-- 程式裡有一段用「// ===== 【可客製】」標記開頭和結尾的程式，負責「去哪裡抓、記哪些欄位」。換資料來源只換這一段，其他地方都不動。
-- 程式會自動做：用「身分證」擋掉重複、標題很像的收成同一個群組、記下抓取時間、新抓到的資料亮黃燈。
-- 程式跑在 Google Apps Script（Google 內建的小程式）：只能抓「不用登入、打開網址就看得到資料」的地方，每次最多跑 6 分鐘。
+- 程式會跑在 Google 試算表的 Apps Script（Google 內建的小程式）裡。我會把你給的程式整份貼進去，按「執行」。
+- 程式的骨架已經寫好、測過了，在這份訊息最後面的【骨架程式】。它會：照「設定」分頁的分類表去抓資料、用「身分證」擋掉重複、標題很像的收成同一群組、記下抓取時間、新抓到的資料亮黃燈；「設定」分頁勾一下「立刻抓」就抓，勾「每天自動抓」就每天早上 8 點自己跑。
+- 骨架只吃 RSS（訂閱格式）的來源，預設是 Google 新聞的 RSS：關鍵字由分類表決定，台灣多數媒體的新聞都會被它收錄。
+- 你只能改骨架裡我在【問完之後】列出的那幾個地方，其他一個字都不能動，也不能自己重寫一份。
+
+【開場（第一句就照這樣講）】
+我是「資料追蹤小幫手」。我會一題一題問你，共 5 題，問完交給你一份完整程式，再帶你貼上、執行。
+一次只問一題，每題有選項，回英文字母就好；沒有合的回 E 自己填，不知道回 F。
+先確認三件事：① 請用電腦操作，手機打不開 Apps Script。② 收視數字、合約、個資不要貼給我，改成假名假數字，流程一樣跑得出來。③ 要抓的地方必須是「不用登入、打開網址就看得到」的公開資料。
 
 【怎麼問】
-- 一次只問一題，等我回答再問下一題。共 5 題；需要時可以追問，但整體不超過 8 題。
-- 每題開頭寫「第 N 題／共 5 題」，接一句「為什麼問這個」。
+- 一次只問一題，等我回答再問下一題。基本 5 題；如果第 5 題選「要做儀表板」會立刻追問「用途」和「風格」（共 2 個額外追問），整體不超過 8 題。
+- 每題開頭寫「第 N 題／共 5 題」（追問時寫「第 5a 題」、「第 5b 題」），接一句「為什麼問這個」。
 - 每題給 A／B／C／D 選項，在你推薦的那個後面標「（推薦）」，用一句話說理由。
 - 每題最後固定再給兩個選項，各自獨立一行：
   E 自己填：選項都不合，直接打你的答案
   F 不知道：我先用最常見的情況幫你往下走
-- 我可以複選，也可以改選項裡的字。
-- 只在第 1 題結尾提醒一次回答方式（例如「A」「A、C」「E 我想要⋯」），之後不用重複。
-- 如果我提到敏感內容（收視數字、合約、人事、個資、未公開的專案），提醒我一句：這類東西不要貼進 AI，也不要放進會分享出去的試算表，先用假資料跑流程。
+- 我可以複選，也可以改選項裡的字。只在第 1 題結尾提醒一次回答方式，之後不用重複。
+- 我講得含糊（「差不多」「都可以」）時不要接受，換個具體的問法再問一次。
+- 我提到敏感內容（收視數字、合約、人事、個資、未公開的專案）時，提醒一句：不要貼進 AI，也不要放進會分享出去的試算表，先用假資料跑流程。
 
 【要問的 5 題】
 
 第 1 題　想追蹤什麼
-- 問我想每天盯的主題。選項依常見情況給，例如：某個人或團體的新聞（藝人、競品）／某個主題的新聞（颱風、AI 政策）／政府標案或公告／某個網站的最新文章。
+- 問我想每天盯的主題。選項依常見情況給，例如：某個人或團體的新聞（藝人、競品、客戶）／某個主題的新聞（颱風、AI 政策）／政府標案或公告／某個網站的最新文章。
 - 我答完後，幫我整理成 1～5 個「分類」，每個分類先想好 5～8 個「相關字」，列出來請我確認或刪改。我可能一時想不起來，所以相關字一定要由你先提。
 - 相關字的原則：越具體越好；太籠統的詞（例如「活動」）會抓到一堆不相關的；要完全一模一樣才算的詞，前後加英文引號，例如 "正午新聞"。
 
 第 2 題　去哪裡抓
-- 如果你能上網：先上網找 3～5 個抓得到這些資料的地方，每個都附上完整網址，並標一個燈號：
-  🟢 能自動抓：打開網址就看得到資料，而且有固定格式，例如 Google 新聞、RSS（訂閱格式）、公開的 API（資料介面）
-  🟡 抓得到但容易壞：要從一般網頁裡拆資料，網站一改版就會壞，要有人定期檢查
-  🔴 抓不到：要登入才看得到、打開網址是空的（網頁是程式動態產生的）、網站條款禁止抓取、要付費
-- 用選項列出來，推薦一個 🟢。分類是新聞類的話，Google 新聞一定要是其中一個選項。
-- 如果你不能上網：直接跟我說，請我把想抓的網址貼給你，你再幫我判斷燈號。
-- 如果我選的地方是 🔴：跟我說這個自己做不到，建議填「AI 需求申請單」m.aiurl.tw/5qrdo，並幫我寫 3～5 句可以直接貼進申請單的說明；然後問我要不要換一個 🟢 或 🟡 的地方繼續。
+- 預設推薦 Google 新聞（🟢）：不用申請、台灣多數媒體都收，關鍵字直接用第 1 題的分類表。
+- 如果我指定某個網站，你能上網就去查它有沒有 RSS（網址通常有 rss 或 feed 字樣；內容開頭是 &lt;rss&gt;、裡面一則一則是 &lt;item&gt;）：
+  🟢 有 RSS、內容是 &lt;item&gt;：可以用，記下網址，第 3 題要用。
+  🟡 有 RSS 但是 Atom 格式（一則一則是 &lt;entry&gt;）、或網站沒有 RSS：這一版的骨架吃不到。跟我說清楚，並建議先用 Google 新聞、把這個網站的名字加進相關字；真的只有那個網站才有的資料，建議填「AI 需求申請單」m.aiurl.tw/5qrdo，並幫我寫 3～5 句可以直接貼進申請單的說明。
+  🔴 要登入、要付費、網站條款禁止抓取：不做。跟我說原因，問我要不要換成 🟢。
+- 你不能上網的話，直接跟我說，請我把網址貼給你（或把網址打開後最前面幾行貼給你），你再判斷燈號。
 
-第 3 題　要記錄哪些欄位
-- 只列出第 2 題選的地方「真的給得出來」的欄位當選項（例如新聞有：標題、媒體、發布時間；標案有：標案名稱、機關、金額、截止日），並推薦一組。
-- 「身分證」和「標題」一定要有、不能拿掉，並用一句話跟我解釋：
-  身分證（主鍵）用來擋掉重複，要選一個不會重複、也不會變的東西，例如網址或案號；
-  標題用來判斷「同一件事」和貼分類標註。
-- 選項外的欄位名稱，我可以自己打。
-- 「抓取時間」「群組」「標註」這三欄程式會自動加，不用選。
+第 3 題　時間區間與自動抓
+- 問我「每次抓最近幾天」：1／3／7（推薦）／14／30 天。第一次跑建議先用 30 天，看得到比較多資料，之後再改回 7。
+- 問我要不要每天自動抓：要（推薦，資料才會累積）／先不要。
+- 順便告訴我這一版的欄位是固定的：身分證（網址）、標題、媒體、發布時間，加上程式自動填的抓取時間、群組、標註。想多記別的欄位，先記下來當下一版需求，這一版不改。
+- 第 2 題選的是 Google 新聞以外的 RSS 時，在這一題列出那個 RSS 裡每一則有哪些標籤（例如 &lt;title&gt;、&lt;link&gt;、&lt;pubDate&gt;、&lt;source&gt;），請我確認「身分證＝哪個標籤、標題、媒體、時間各是哪個」；來源沒有「媒體」就留空。
 
 第 4 題　需要統整的內容
 - 問我有沒有要定期統整的東西，例如：每週重點摘要／各分類幾則的排行／某個主題的進度追蹤。沒有的話，我可以回「無」。
 
 第 5 題　要不要做成儀表板
-- 儀表板＝把表變成一眼看得懂的圖表網頁。依第 4 題推薦要或不要：第 4 題是「無」就推薦不要。
+- 儀表板＝把試算表的資料畫成圖表網頁。我交給你 HTML 程式碼，你貼進 Apps Script、部署成網頁。
+- 依第 4 題推薦要或不要：第 4 題是「無」就推薦不要。
+
+   A 要（推薦：把試算表資料編成精美的視覺圖表網頁，方便報告或隨時監控）
+   B 先不要
+
+   E 自己填：有其他想法
+   F 不知道：我幫你決定
+
+- 如果你選「要」，接下來會立刻問：
+
+   【第 5a 題　選圖表風格（1-7）】
+   1) 顧問風 McKinsey — 冷靜、專業、決策導向
+   2) 企業風 Corporate — 正式、可信、商業感強
+   3) 極簡風 Minimalist — 留白多、聚焦重點、現代
+   4) 簡報風 Professional — 易讀、清晰、對比明確
+   5) 圖表風 Framework — 結構化、邏輯清晰、易理解
+   6) 扁平風 Flat Vector — 色彩和諧、現代活力、視覺化
+   7) 玻璃風 Glassmorphism — 科技感、透光、高級
+
+   【第 5b 題　選用途（1-5）】
+   1) 主管／老闆決策 — 重點一眼看、聚焦 KPI
+   2) 團隊工作面板 — 細節完整、可鑽研、可篩選
+   3) 客戶展示用 — 品牌形象、故事感、專業呈現
+   4) 自己日常追蹤 — 個人監控、習慣養成、進度記錄
+   5) 協作分享 — 跨部門共用、即時更新、團隊同步
 
 【問完之後】
-1. 先用 3～5 句話複述你理解的：追蹤什麼、去哪抓（燈號）、記哪些欄位、統整什麼、要不要儀表板。請我確認或更正，我說對了才開始產出。
-2. 依序產出下面這幾樣，每一樣前面先用一句話說「這段要貼到哪裡」：
+1. 先用 3～5 句話複述你理解的：追蹤什麼（分類表）、去哪抓（燈號）、抓幾天、要不要每天抓、統整什麼、要不要儀表板。請我確認或更正，我說「對」才開始產出。
 
-① 分類表
-兩欄的表格：「分類｜相關字（用頓號、隔開）」。
-貼法：打開試算表的「設定」分頁，從分類表的第一列（A9 格）開始貼；原本的預設分類可以刪掉。
+2. 交出完整程式。規則：
+   - 把【骨架程式】從第一行 /** @OnlyCurrentDoc */ 到最後一行 // ===== 程式結尾 ===== 原封不動照抄，放在一個程式碼區塊裡，只改下面四處：
+     ① 開頭註解第一行「關鍵字新聞資料庫｜種子雙周會示範成品」→ 改成「〈主題〉追蹤資料庫｜〈我的部門或名字〉」
+     ② DEFAULT_CATEGORIES → 換成第 1 題確認的分類表，格式和原本一模一樣：['分類', '相關字、相關字、相關字']
+     ③ DEFAULT_DAYS → 第 3 題的天數
+     ④ 只有第 2 題不是 Google 新聞時，才改「來源網址」（貼固定網址、不要寫 {關鍵字}）和「要抓的項目」（右邊填第 3 題確認的標籤名；沒有媒體就填 ''）
+   - 其他地方一個字都不改：不要改名、不要刪註解、不要「精簡」、不要用「…以下相同」「其餘不變」省略。
+   - 程式最後一行一定要是 // ===== 程式結尾 =====。給完程式先自己檢查：最後一行在不在。
+   - 如果你一次放不下整份程式：不要硬分段。改成跟我說「程式太長，我們改用兩段貼法」，然後只給我 ②（分類表，做成兩欄表格，貼到「設定」分頁 A9 開始）和 ④（只在需要時），並告訴我骨架從課堂的 QR 帶走頁「一鍵複製程式」拿，先貼骨架、再貼分類表。
 
-② 【可客製】段
-- 如果第 2 題選 Google 新聞、第 3 題的欄位也剛好是「標題、媒體、發布時間」：直接跟我說「不用換，保留原本那段」，跳過這一樣。
-- 其他情況：寫一段完整的 Apps Script 程式，第一行和最後一行一定要是：
-  // ===== 【可客製】抓取：想換資料來源，只改這一段 =====
-  // ===== 【可客製】結束 =====
-  中間要包含下面兩樣東西，名稱和格式都不能改：
-  (1) 設定
-      const SOURCE = {
-        idLabel: '身分證（〈用什麼當身分證〉）',
-        fields: ['標題', 〈其他欄位名稱〉],  // 第一個一定是「標題」
-        timeField: '〈用來判斷時間區間的欄位名稱，沒有就寫空字串〉',
-      };
-  (2) 抓取函式
-      function fetchSource_(category, days) {
-        // category = { name: 分類名稱, words: [相關字, ...] }；days = 最近幾天
-        // 回傳陣列，每一筆長這樣：{ id: 身分證, 標題: '...', 〈其他欄位〉: 值 }
-        // 時間欄位要是 Date；抓不到就回傳空陣列 []，不要讓程式整個停下來
+3. 程式後面接著給「貼上與執行」步驟，一步一行：
+   ① 在瀏覽器網址列打 sheets.new 開一份新的試算表 → 上方「擴充功能」→「Apps Script」。
+   ② 左邊檔案清單是「程式碼.gs」，右邊編輯區原本有幾行範例，全選刪掉，貼上整份程式。
+   ③ 按 Ctrl+S 存檔（上方磁碟圖示）。
+   ④ 編輯區上方的函式選單選「setup」（不是 onSettingsEdit、不是 runDaily）→ 按「▷ 執行」。不用按、也不要按右上角藍色的「部署」。
+   ⑤ 第一次執行會跳授權：「審查權限」→ 選你的帳號 →「Google 尚未驗證這個應用程式」→ 左下「進階」→「前往（專案名稱）」→「允許」。這是因為程式是你自己貼的、Google 沒審過，正常。
+   ⑥ 回到試算表，看「設定」分頁的狀態列：出現「本次新增 N 筆」就成功了。要每天自動抓的，把「每天早上 8 點自動抓」打勾。「資料」分頁的欄位順序不要搬動，程式認的是位置。
+
+4. 之後依序給（有才給）：
+   - 第 4 題不是「無」：一段我每週可以重複用的「統整 prompt」：開頭說清楚角色、要產出什麼、格式、給誰看，留一個明顯的標記「=== 把這週的資料貼這裡 ===」。用法：在「資料」分頁選取要統整的那幾列、複製，貼到標記的地方送出。
+   - 第 5 題選「要」（已在第 5 題確認用途和風格）：根據你選的「圖表風格」和「用途」交儀表板程式碼（HTML）。
+   
+   【儀表板程式碼規則】
+   我答完選擇後，你交儀表板程式碼：
+   ① 給我完整的 HTML 程式碼，一個 `&lt;html&gt;` 開頭、`&lt;/html&gt;` 結尾的完整網頁（不要省略、不要分段）。
+   ② 程式碼必須符合我選的「圖表風格」和「用途」：
+      - 選的風格決定配色、排版、圖表視覺風格
+      - 選的用途決定資訊優先順序、詳細程度、互動方式
+   ③ 必須包含：深淺主題切換按鈕、響應式設計（手機也好看）、圖表自動讀試算表資料（用 Google Charts 或 Chart.js，不要其他套件）
+   ④ **必須包含 doGet() 函式**（Google Apps Script 網頁應用程式的必要函式）。
+      完整程式的結構是：HTML 程式碼 → 換行 → `function doGet() { return HtmlService.createHtmlOutput(/* HTML 在這裡 */); }`。
+      或者：HTML 寫在 dashboard.html 分開的檔案裡，Code.gs 最後加 `function doGet() { return HtmlService.createTemplateFromFile('dashboard.html').evaluate(); }`。
+   ⑤ 程式碼最後一行一定要是 `}`（doGet 函式的結尾）。給完之後先自己檢查：最後一行在不在。
+
+5. 儀表板貼上與部署（第 5 題選「要」時的步驟）：
+   ① 在 Apps Script 上方選單新建一個檔案：「+」→「HTML」，檔名叫「dashboard.html」。
+   ② 右邊編輯區原本有範例，全選刪掉，貼上我交給你的 HTML 程式碼（從 `&lt;html&gt;` 到包含 doGet 函式的最後一個 `}`）。
+   ③ 按 Ctrl+S 存檔。
+   ④ 回到「程式碼.gs」，確認最後面有我寫的 doGet() 函式。如果沒有，複製我給的 doGet 部分貼在最後（`function doGet() { ... }`）。
+   ⑤ 選上方選單「部署」（不是「執行」）→「新增部署」→「類型」選「網頁應用程式」。
+   ⑥ 跳出視窗：「執行身分」選你的帳號，「誰可以存取」選「任何人」。點「部署」。
+   ⑦ 完成。會出現一個網址，貼進瀏覽器打開就看到儀表板。每次「資料」分頁有新資料，重新整理網頁就更新。
+      （如果打開時報錯「找不到指令碼函式：doGet」，表示 doGet() 沒有正確複製，回頭檢查第 ④ 步。）
+
+6. 出錯怎麼辦（我貼回來時照這樣處理）：
+   - 我貼紅字錯誤訊息：先用白話說是什麼原因，再給修正後的「完整程式」（還是整份，不是片段），最後列出你改了哪幾行、為什麼。
+   - 「本次新增 0 筆」：不是壞掉。多半是相關字太冷門或天數太短；請我到「設定」分頁把天數改 30，再勾一次「立刻抓」。
+   - 時間看起來差了幾小時：請我在試算表「檔案」→「設定」→ 時區改「台北」。
+   - 「某某 這次沒抓到，下次再試」：來源暫時連不上，舊資料沒事，隔天會自己再抓。
+   - 儀表板網頁打不開，報錯「找不到指令碼函式：doGet」：表示 doGet() 函式沒有正確複製進 dashboard.html 或 Code.gs。檢查我給你的程式碼最後有沒有 `function doGet() { ... }`；如果沒有，複製貼上到 Code.gs 最後，再部署一次。
+   - 儀表板一片空白或顯示有誤：試試「清除瀏覽器快取」、用無痕視窗重開、或確認「資料」分頁的欄位順序沒被搬動。
+   - 每次重新給程式之前，先把目前的分類表和設定重列一次讓我確認，避免對話太長你記錯。
+
+6. 最後附三句我之後可以直接貼給你的話：
+   「幫我在分類表加一類：〇〇，相關字你先想」
+   「我想改成抓 △△ 的 RSS，網址是…，幫我改『來源網址』和『要抓的項目』」
+   「幫我寫一段每週摘要的 prompt，給主管看的」
+
+【不要做的事】
+- 不要一次丟五題。不要幫我決定，每題攤開來問。
+- 不要在我說「對」之前產出程式（包括儀表板 HTML）。
+- 不要省略、精簡、重排骨架，不要自己重寫一份，不要用骨架以外的做法。
+- 不要用外部套件、不要叫我申請 API 金鑰。Apps Script 部署要按，但 HTML 部分要我自己按。
+- 儀表板 HTML：只用 Google Charts 或 Chart.js，不要其他套件；不要自己連試算表（Google Sheets API 太複雜，改用 HTML 表格讀 sheetdb 或我手動複製資料進去）。
+- 不接受「都可以」「差不多」；換個具體問法再問一次。
+- 我連續幾題都只回「好」的話，提醒我：只是點頭的表，做出來不會有人用。
+
+開始吧：先講開場，然後問我第 1 題。
+
+【骨架程式】
+/** @OnlyCurrentDoc */
+/**
+ * 關鍵字新聞資料庫｜種子雙周會示範成品
+ *
+ * 這份程式做的事：
+ *   照「設定」分頁的分類表，去 Google 新聞抓最近幾天的新聞，
+ *   存進「資料」分頁，變成一個會越存越多的簡易資料庫。
+ *
+ * 第一次用：上方選單確認選的是「setup」，按「執行」，照畫面允許權限。
+ * 之後要抓：到「設定」分頁，勾「立刻抓」。
+ *
+ * 想改抓什麼 → 改「設定」分頁就好，不用碰程式。
+ * 想換資料來源 → 按 Ctrl+F 搜「【可客製】」，只改那裡的兩格：網址、要抓哪些項目。
+ */
+
+// ============================================================
+// 一、會用到的三個入口
+// ============================================================
+
+/** 第一次使用：建好三個分頁、裝好勾選框，並且馬上抓第一次 */
+function setup() {
+  const ss = SpreadsheetApp.getActive();
+  prepareSettingsSheet_(ss);
+  prepareDataSheet_(ss);
+  prepareBoardSheet_(ss);
+  installEditTrigger_(ss);
+  ss.getSheetByName(SHEETS.settings).activate();
+  runFetch_();
+  ss.toast('設定完成！到「設定」分頁看狀態列', '完成', 5);
+}
+
+/** 「設定」分頁有人改東西時，Google 會自動呼叫這裡（不用手動執行） */
+function onSettingsEdit(e) {
+  const range = e &amp;&amp; e.range;
+  if (!range || range.getSheet().getName() !== SHEETS.settings) return;
+  const cell = range.getA1Notation();
+  if (cell === CELLS.runNow &amp;&amp; range.getValue() === true) {
+    range.setValue(false); // 勾完自動取消，下次可以再勾
+    runFetch_();
+  } else if (cell === CELLS.daily) {
+    setDailyTrigger_(range.getValue() === true);
+  }
+}
+
+/** 每天自動抓（「每天早上 8 點自動抓」打勾後，Google 每天會呼叫這裡） */
+function runDaily() {
+  runFetch_();
+}
+
+// ============================================================
+// 二、程式讀的位置表（要搬格子或改規則，只改這裡）
+// ============================================================
+
+const SHEETS = { settings: '設定', data: '資料', board: '關聯看板' };
+
+// 「設定」分頁的格子
+const CELLS = {
+  days: 'B3',   // 時間區間（最近幾天）
+  runNow: 'B4', // 立刻抓（勾選框）
+  daily: 'B5',  // 每天自動抓（勾選框）
+  status: 'B6', // 狀態列
+};
+const CATEGORY_HEADER_ROW = 8; // 分類表的表頭在第 8 列，第 9 列開始是分類
+const CATEGORY_ROWS = 30;      // 分類表預留幾列可以填
+const DAY_OPTIONS = [1, 3, 7, 14, 30];
+const DEFAULT_DAYS = 7;
+const DAILY_HOUR = 8;          // 每天自動抓的時間（早上 8 點左右）
+
+// 「資料」分頁的欄位：前 5 欄是原始資料，後 2 欄是加工欄
+const DATA_HEADERS = ['身分證（網址）', '標題', '媒體', '發布時間', '抓取時間', '群組', '標註'];
+const COL = { id: 0, title: 1, source: 2, published: 3, fetched: 4, group: 5, tags: 6 };
+const RAW_COLUMNS = 5;
+
+// 同一件事的判斷
+const SAME_STORY_THRESHOLD = 0.25; // 兩個標題的共同字比例 ≥ 這個數，就算同一件事（用真實新聞調過）
+const COMPARE_WINDOW = 1000;      // 只跟最新的這麼多筆比，資料再多也不會變慢
+
+// 分類表的預設內容（第一次 setup 時寫進「設定」分頁，之後以分頁上的為準）
+const DEFAULT_CATEGORIES = [
+  ['演藝', '藝人、演員、歌手、戲劇、連續劇、八點檔、導演、電影'],
+  ['政治', '立委、立法院、總統、行政院、選舉、政黨、市長、議員'],
+  ['科技', 'AI、人工智慧、半導體、晶片、手機、輝達、App、蘋果'],
+  ['財金', '股市、台股、央行、利率、匯率、通膨、ETF、營收'],
+  ['娛樂', '綜藝、節目、演唱會、音樂祭、網紅、YouTuber、實境秀、頒獎'],
+  ['體育', '棒球、中職、籃球、NBA、奧運、中華隊、足球、網球'],
+  ['健康', '醫師、疾病、疫苗、癌症、飲食、睡眠、健保、醫院'],
+];
+
+const COLORS = {
+  blue: '#18499E',     // 原始資料欄的表頭
+  orange: '#E2622C',   // 加工欄的表頭、狀態列
+  editable: '#FDEBDD', // 可以改的格子
+  fresh: '#FFF3B0',    // 這次新抓到的列（亮黃燈）
+  text: '#1F1F1F',
+  muted: '#6B6B6B',
+};
+
+// ============================================================
+// ===== 【可客製】只改下面兩格，其他一個字都不用動 =====
+// ============================================================
+
+// ① 要抓哪裡：把來源網址貼進來
+//    網址裡寫 {關鍵字} 的地方，會自動換成「設定」分頁分類表裡的字。
+//    如果來源不用關鍵字（例如某家媒體的 RSS），就貼固定網址、不要寫 {關鍵字}，會整包收下來。
+const 來源網址 = 'https://news.google.com/rss/search?q={關鍵字}&amp;hl=zh-TW&amp;gl=TW&amp;ceid=TW:zh-Hant';
+
+// ② 要抓哪些項目：左邊是你表格的欄位，右邊是來源資料裡的標籤名
+//    不知道標籤名怎麼看：用瀏覽器打開來源網址，會看到 &lt;title&gt;、&lt;link&gt; 這種東西，那就是標籤名。
+const 要抓的項目 = {
+  身分證: 'link',      // 每一筆專屬的網址，重複就是靠它認出來的
+  標題: 'title',
+  媒體: 'source',     // 來源沒有這個標籤就留空字串 ''
+  時間: 'pubDate',
+};
+
+// 「要抓幾天內」不用改這裡，去「設定」分頁改就好。
+
+// ============================================================
+// ===== 【可客製】結束，以下是機器在做的事，不用看懂 =====
+// ============================================================
+
+/** 把一類的相關字塞進來源網址 */
+function buildFeedUrl_(words, days) {
+  if (來源網址.indexOf('{關鍵字}') &lt; 0) return 來源網址; // 固定網址的來源，整包收下
+  const terms = words.map((w) =&gt; (w.indexOf(' ') &gt;= 0 ? '"' + w + '"' : w));
+  const query = '(' + terms.join(' OR ') + ') when:' + days + 'd';
+  return 來源網址.replace('{關鍵字}', encodeURIComponent(query));
+}
+
+/** 把來源回傳的內容（RSS），照②的對照表拆成一筆一筆 */
+function parseFeed_(xml) {
+  const blocks = xml.match(/&lt;item&gt;[\s\S]*?&lt;\/item&gt;/g) || [];
+  const items = [];
+  blocks.forEach((block) =&gt; {
+    const id = pickTag_(block, 要抓的項目.身分證);
+    const source = 要抓的項目.媒體 ? pickTag_(block, 要抓的項目.媒體) : '';
+    let title = pickTag_(block, 要抓的項目.標題);
+    const suffix = ' - ' + source; // 有些來源的標題後面會接「 - 媒體名」，拿掉
+    if (source &amp;&amp; title.endsWith(suffix)) title = title.slice(0, -suffix.length);
+    if (id &amp;&amp; title) {
+      items.push({
+        id: id,
+        title: title,
+        source: source,
+        published: new Date(pickTag_(block, 要抓的項目.時間)),
+      });
+    }
+  });
+  return items;
+}
+
+/** 每一類各抓一次，一次同時送出 */
+function fetchAll_(categories, days) {
+  const requests = categories.map((c) =&gt; ({ url: buildFeedUrl_(c.words, days), muteHttpExceptions: true }));
+  const responses = UrlFetchApp.fetchAll(requests);
+  return categories.map((c, i) =&gt; {
+    const res = responses[i];
+    if (res.getResponseCode() !== 200) return { category: c.name, items: [], failed: true };
+    return { category: c.name, items: parseFeed_(res.getContentText('UTF-8')), failed: false };
+  });
+}
+
+// ============================================================
+// 三、整理資料：② 認身分證 → ③ 分群組 → ④ 貼標註
+//     這一段只處理「一筆一筆的資料」，不管資料是從哪裡抓來的
+// ============================================================
+
+/** 把各類抓回來的合併：同一個網址只留一筆，並記下它是從哪幾類搜到的 */
+function mergeBatch_(results, days, now) {
+  const cutoff = now.getTime() - days * 24 * 3600 * 1000;
+  const byId = {};
+  const order = [];
+  results.forEach((r) =&gt; {
+    r.items.forEach((item) =&gt; {
+      if (item.published.getTime() &lt; cutoff) return; // 超過時間區間的不要
+      if (!byId[item.id]) {
+        byId[item.id] = Object.assign({ fromCategories: [] }, item);
+        order.push(item.id);
       }
-  規則：
-  - 只能用 Apps Script 內建的 UrlFetchApp、XmlService、JSON、Utilities，不要用外部套件。
-  - 每個重要步驟寫一句中文註解，讓不會寫程式的人看得懂在做什麼。
-  - 燈號是 🟡 的，在開頭註解寫明「這個網站改版就可能壞掉」。
-  貼法：在 Apps Script 按 Ctrl+F 搜「【可客製】」，把開始到結束那整段換成這段，再按儲存。欄位跟原本不一樣時，請開一份新的試算表重新安裝，不要跟舊資料混在一起。
+      if (byId[item.id].fromCategories.indexOf(r.category) &lt; 0) byId[item.id].fromCategories.push(r.category);
+    });
+  });
+  const time = (item) =&gt; item.published.getTime() || 0;
+  return order.map((id) =&gt; byId[id]).sort((a, b) =&gt; time(b) - time(a)); // 新的排前面
+}
 
-③ 統整 prompt（第 4 題回「無」就跳過）
-寫一段我每週可以重複用的 prompt：開頭說清楚角色、要產出什麼、格式、給誰看，並留一個明顯的標記「=== 把這週的資料貼這裡 ===」。
-用法：在「資料」分頁選取要統整的那幾列、複製，貼到標記的地方送出。
+/** ② 認身分證：網址已經在資料庫裡的，不加列、也不做任何動作，只算數量 */
+function splitNewAndSeen_(items, existingIds) {
+  const fresh = [];
+  let seenCount = 0;
+  items.forEach((item) =&gt; {
+    if (existingIds.has(item.id)) seenCount++;
+    else fresh.push(item);
+  });
+  return { fresh: fresh, seenCount: seenCount };
+}
 
-④ 儀表板（第 5 題選「不要」就跳過）
-跟我說：照課堂講義「儀表板」那一頁的步驟做。
+/**
+ * ③ 分群組：標題很像的（同一件事、不同媒體），給同一個群組編號
+ *   fresh：這次新抓到的；recent：資料庫裡最新的幾筆 { title, group }
+ *   回傳 updates：recent 裡原本沒有群組、這次被配成一組的，要補寫回資料分頁
+ */
+function assignGroups_(fresh, recent, nextNo) {
+  const pool = recent.map((r, i) =&gt; ({ sig: titleSignature_(r.title), ref: r, recentIndex: i }));
+  const updates = [];
+  fresh.forEach((item) =&gt; {
+    const sig = titleSignature_(item.title);
+    let best = null;
+    let bestScore = 0;
+    pool.forEach((p) =&gt; {
+      const score = similarity_(sig, p.sig);
+      if (score &gt;= SAME_STORY_THRESHOLD &amp;&amp; score &gt; bestScore) {
+        best = p;
+        bestScore = score;
+      }
+    });
+    item.group = '';
+    if (best) {
+      if (!best.ref.group) {
+        best.ref.group = '第' + nextNo + '組';
+        nextNo++;
+        if (best.recentIndex !== undefined) updates.push({ index: best.recentIndex, group: best.ref.group });
+      }
+      item.group = best.ref.group;
+    }
+    pool.push({ sig: sig, ref: item });
+  });
+  return { updates: updates, nextNo: nextNo };
+}
 
-3. 最後用一句話告訴我怎麼測試：回到「設定」分頁，勾一下「立刻抓」，看狀態列有沒有出現「本次新增 N 筆」。
+/** 把標題拆成「每兩個字一組」，拿來比對像不像（標點、空白先拿掉） */
+function titleSignature_(title) {
+  const s = String(title).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+  const grams = new Set();
+  for (let i = 0; i &lt; s.length - 1; i++) grams.add(s.slice(i, i + 2));
+  return grams;
+}
 
-開始吧：先問我第 1 題。</pre></details>
+/** 兩個標題的共同字比例：0 = 完全不像，1 = 一模一樣 */
+function similarity_(a, b) {
+  if (!a.size || !b.size) return 0;
+  const small = a.size &lt;= b.size ? a : b;
+  const large = small === a ? b : a;
+  let shared = 0;
+  small.forEach((g) =&gt; {
+    if (large.has(g)) shared++;
+  });
+  return shared / (a.size + b.size - shared);
+}
+
+/** 找出目前用到第幾組，新的一組從下一號開始 */
+function nextGroupNo_(groups) {
+  let max = 0;
+  groups.forEach((g) =&gt; {
+    const m = String(g).match(/\d+/);
+    if (m) max = Math.max(max, Number(m[0]));
+  });
+  return max + 1;
+}
+
+/** ④ 貼標註：從哪一類搜到就貼那一類；標題又提到別類的相關字，也一起貼 */
+function tagsFor_(item, categories) {
+  return categories
+    .filter((c) =&gt; item.fromCategories.indexOf(c.name) &gt;= 0 ||
+      c.words.some((w) =&gt; titleHasWord_(item.title, w)))
+    .map((c) =&gt; '【' + c.name + '】')
+    .join('');
+}
+
+/** 標題裡有沒有這個相關字：中文直接找；英文要是完整的一個字，避免 TAIWAN 裡的 AI 被當成 AI */
+function titleHasWord_(title, word) {
+  const t = String(title).toLowerCase();
+  const w = String(word).toLowerCase();
+  if (!/^[a-z0-9 ]+$/.test(w)) return t.indexOf(w) &gt;= 0;
+  return new RegExp('(^|[^a-z0-9])' + w + '([^a-z0-9]|$)').test(t);
+}
+
+/** 關聯看板要的數字：各類幾則、這次新抓到幾則、哪些事被多家媒體報導 */
+function summarize_(rows, freshIds, categories) {
+  const counts = categories.map((c) =&gt; ({ name: c.name, total: 0, fresh: 0 }));
+  const groups = {};
+  rows.forEach((r) =&gt; {
+    const tags = String(r[COL.tags]);
+    const isFresh = freshIds.has(r[COL.id]);
+    counts.forEach((c) =&gt; {
+      if (tags.indexOf('【' + c.name + '】') &lt; 0) return;
+      c.total++;
+      if (isFresh) c.fresh++;
+    });
+    const g = r[COL.group];
+    if (!g) return;
+    const entry = groups[g] || (groups[g] = { group: g, count: 0, title: r[COL.title], sources: [], tags: [] });
+    entry.count++;
+    if (entry.sources.indexOf(r[COL.source]) &lt; 0) entry.sources.push(r[COL.source]);
+    (tags.match(/【[^】]+】/g) || []).forEach((t) =&gt; {
+      if (entry.tags.indexOf(t) &lt; 0) entry.tags.push(t);
+    });
+  });
+  const topGroups = Object.keys(groups)
+    .map((k) =&gt; groups[k])
+    .filter((g) =&gt; g.count &gt;= 2)
+    .sort((a, b) =&gt; b.count - a.count)
+    .slice(0, 30)
+    .map((g) =&gt; ({
+      group: g.group,
+      count: g.count,
+      title: g.title,
+      tags: g.tags.join(''),
+      sources: g.sources.slice(0, 5).join('、') + (g.sources.length &gt; 5 ? ' 等 ' + g.sources.length + ' 家' : ''),
+    }));
+  return { counts: counts, topGroups: topGroups };
+}
+
+/** 把相關字拆開：頓號、逗號、分號、斜線、換行都可以；重複的只留一個 */
+function parseWords_(text) {
+  const seen = {};
+  return String(text == null ? '' : text)
+    .split(/[、,，;；\/\n]+/)
+    .map((w) =&gt; w.trim())
+    .filter((w) =&gt; {
+      if (!w || seen[w]) return false;
+      seen[w] = true;
+      return true;
+    });
+}
+
+// ============================================================
+// 四、主流程：① 抓取 → ② 認身分證 → ③ 分群組 → ④ 貼標註 → ⑤ 寫入並亮燈
+// ============================================================
+
+function runFetch_() {
+  const ss = SpreadsheetApp.getActive();
+  const lock = LockService.getDocumentLock();
+  if (!lock.tryLock(1000)) {
+    setStatus_(ss, '上一次還在抓，請等它跑完再勾');
+    return;
+  }
+  try {
+    const settings = readSettings_(ss);
+    if (!settings.categories.length) {
+      setStatus_(ss, '分類表是空的：請在下面的分類表至少填一列');
+      return;
+    }
+    setStatus_(ss, '抓取中⋯請稍候（約 10～30 秒）');
+    SpreadsheetApp.flush();
+
+    const now = new Date();
+    const results = fetchAll_(settings.categories, settings.days); // ① 抓取
+    const batch = mergeBatch_(results, settings.days, now);
+
+    const dataSheet = ss.getSheetByName(SHEETS.data);
+    const existing = readDataRows_(dataSheet);
+    const split = splitNewAndSeen_(batch, new Set(existing.map((r) =&gt; r[COL.id]))); // ② 認身分證
+
+    const recent = existing.slice(0, COMPARE_WINDOW).map((r) =&gt; ({ title: r[COL.title], group: r[COL.group] }));
+    const grouping = assignGroups_(split.fresh, recent, nextGroupNo_(existing.map((r) =&gt; r[COL.group]))); // ③ 分群組
+    split.fresh.forEach((item) =&gt; {
+      item.tags = tagsFor_(item, settings.categories); // ④ 貼標註
+    });
+
+    const newRows = split.fresh.map((item) =&gt; toRow_(item, now));
+    writeResults_(dataSheet, newRows, grouping.updates.length ? recent : null); // ⑤ 寫入並亮燈
+
+    recent.forEach((r, i) =&gt; {
+      existing[i][COL.group] = r.group;
+    });
+    const freshIds = new Set(newRows.map((r) =&gt; r[COL.id]));
+    writeBoard_(ss, summarize_(newRows.concat(existing), freshIds, settings.categories));
+
+    const failed = results.filter((r) =&gt; r.failed).map((r) =&gt; r.category);
+    setStatus_(ss, formatTime_(ss, now) + '｜本次新增 ' + newRows.length + ' 筆、已存在 ' + split.seenCount + ' 筆（沒動）' +
+      (failed.length ? '｜' + failed.join('、') + ' 這次沒抓到，下次再試' : ''));
+  } catch (err) {
+    setStatus_(ss, '出錯了：' + err.message + '（可以再勾一次試試）');
+    throw err;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ============================================================
+// 五、試算表的讀寫
+// ============================================================
+
+function readSettings_(ss) {
+  const sh = ss.getSheetByName(SHEETS.settings);
+  let days = Number(sh.getRange(CELLS.days).getValue());
+  if (!(days &gt;= 1 &amp;&amp; days &lt;= 30)) days = DEFAULT_DAYS;
+  const start = CATEGORY_HEADER_ROW + 1;
+  const lastRow = sh.getLastRow();
+  const categories = lastRow &lt; start ? [] : sh.getRange(start, 1, lastRow - start + 1, 2).getValues()
+    .map((r) =&gt; ({ name: String(r[0]).trim(), words: parseWords_(r[1]) }))
+    .filter((c) =&gt; c.name &amp;&amp; c.words.length);
+  return { days: Math.round(days), categories: categories };
+}
+
+function readDataRows_(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow &lt; 2) return [];
+  return sheet.getRange(2, 1, lastRow - 1, DATA_HEADERS.length).getValues();
+}
+
+function toRow_(item, now) {
+  const published = isNaN(item.published.getTime()) ? '' : item.published;
+  return [item.id, item.title, item.source, published, now, item.group, item.tags];
+}
+
+/** ⑤ 寫入並亮燈：新的放最上面、塗黃色；上一批的黃燈關掉 */
+function writeResults_(sheet, newRows, recentWithGroups) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow &gt; 1) sheet.getRange(2, 1, lastRow - 1, DATA_HEADERS.length).setBackground(null); // 只改顏色，不改內容
+  if (recentWithGroups) {
+    // 舊資料被配成一組的，補上群組編號（只動加工欄，原始資料不動）
+    sheet.getRange(2, COL.group + 1, recentWithGroups.length, 1).setValues(recentWithGroups.map((r) =&gt; [r.group]));
+  }
+  if (!newRows.length) return;
+  sheet.insertRowsBefore(2, newRows.length);
+  sheet.getRange(2, 1, newRows.length, DATA_HEADERS.length)
+    .setValues(newRows)
+    .setBackground(COLORS.fresh)
+    .setFontWeight('normal')
+    .setFontColor(COLORS.text);
+  sheet.getRange(2, COL.published + 1, newRows.length, 2).setNumberFormat('yyyy/mm/dd hh:mm');
+}
+
+function writeBoard_(ss, summary) {
+  const sh = ss.getSheetByName(SHEETS.board);
+  sh.clear();
+  sh.getRange('A1').setValue('關聯看板（每次抓完自動更新，這一頁不用改）')
+    .setFontSize(14).setFontWeight('bold').setFontColor(COLORS.blue);
+
+  const max = Math.max(1, ...summary.counts.map((c) =&gt; c.total));
+  const catRows = [['分類', '累積則數', '本次新抓到', '比例']].concat(
+    summary.counts.map((c) =&gt; ['【' + c.name + '】', c.total, c.fresh, '█'.repeat(Math.round((c.total / max) * 20))]));
+  sh.getRange(3, 1, catRows.length, 4).setValues(catRows);
+  sh.getRange(3, 1, 1, 4).setBackground(COLORS.blue).setFontColor('#FFFFFF').setFontWeight('bold');
+  sh.getRange(4, 4, catRows.length - 1, 1).setFontColor(COLORS.blue);
+
+  const top = 3 + catRows.length + 1;
+  sh.getRange(top, 1).setValue('同一件事：被 2 家以上媒體報導（依則數排序，最多 30 組）').setFontWeight('bold');
+  const groupRows = [['群組', '則數', '分類', '代表標題', '報導媒體']].concat(
+    summary.topGroups.length
+      ? summary.topGroups.map((g) =&gt; [g.group, g.count, g.tags, g.title, g.sources])
+      : [['', '', '', '目前還沒有同一件事被多家媒體報導', '']]);
+  sh.getRange(top + 1, 1, groupRows.length, 5).setValues(groupRows);
+  sh.getRange(top + 1, 1, 1, 5).setBackground(COLORS.orange).setFontColor('#FFFFFF').setFontWeight('bold');
+  [90, 80, 160, 440, 260].forEach((w, i) =&gt; sh.setColumnWidth(i + 1, w));
+}
+
+function setStatus_(ss, text) {
+  ss.getSheetByName(SHEETS.settings).getRange(CELLS.status).setValue(text);
+}
+
+// ---------- 第一次 setup 時才會用到 ----------
+
+function prepareSettingsSheet_(ss) {
+  let sh = ss.getSheetByName(SHEETS.settings);
+  if (!sh) {
+    const sheets = ss.getSheets();
+    const blank = sheets.length === 1 &amp;&amp; sheets[0].getLastRow() === 0;
+    sh = blank ? sheets[0].setName(SHEETS.settings) : ss.insertSheet(SHEETS.settings, 0);
+  }
+  if (sh.getRange('A1').getValue() === '') {
+    // 只有第一次寫預設內容；重跑 setup 不會蓋掉你改過的東西
+    sh.getRange('A1').setValue('設定（這一頁可以改）');
+    sh.getRange('A2').setValue('淺橘色的格子都可以改，改完勾「立刻抓」就好，不用碰程式。');
+    sh.getRange('A3:A6').setValues([['時間區間（最近幾天）'], ['立刻抓（勾一下就開始）'], ['每天早上 8 點自動抓'], ['狀態']]);
+    sh.getRange(CELLS.days).setValue(DEFAULT_DAYS);
+    sh.getRange(CATEGORY_HEADER_ROW, 1, 1, 2).setValues([['分類', '相關字（用頓號「、」隔開）']]);
+    sh.getRange(CATEGORY_HEADER_ROW + 1, 1, DEFAULT_CATEGORIES.length, 2).setValues(DEFAULT_CATEGORIES);
+  }
+  sh.getRange(CELLS.days).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(DAY_OPTIONS.map(String), true).build());
+  sh.getRange(CELLS.runNow).insertCheckboxes();
+  sh.getRange(CELLS.daily).insertCheckboxes();
+
+  sh.getRange('A1').setFontSize(14).setFontWeight('bold').setFontColor(COLORS.blue);
+  sh.getRange('A2').setFontColor(COLORS.muted);
+  sh.getRange('A3:A6').setFontWeight('bold');
+  [CELLS.days, CELLS.runNow, CELLS.daily].forEach((a1) =&gt; sh.getRange(a1).setBackground(COLORS.editable));
+  sh.getRange(CELLS.status).setFontColor(COLORS.orange).setFontWeight('bold');
+  sh.getRange(CATEGORY_HEADER_ROW, 1, 1, 2).setBackground(COLORS.blue).setFontColor('#FFFFFF').setFontWeight('bold')
+    .setNote('這張表同時用在兩件事：①用相關字去搜新聞 ②抓回來後貼上標註');
+  sh.getRange(CATEGORY_HEADER_ROW + 1, 1, CATEGORY_ROWS, 2).setBackground(COLORS.editable).setWrap(true);
+  sh.setColumnWidth(1, 200);
+  sh.setColumnWidth(2, 560);
+}
+
+function prepareDataSheet_(ss) {
+  const sh = ss.getSheetByName(SHEETS.data) || ss.insertSheet(SHEETS.data, 1);
+  if (sh.getRange('A1').getValue() === '') sh.getRange(1, 1, 1, DATA_HEADERS.length).setValues([DATA_HEADERS]);
+  sh.getRange(1, 1, 1, RAW_COLUMNS).setBackground(COLORS.blue);
+  sh.getRange(1, RAW_COLUMNS + 1, 1, DATA_HEADERS.length - RAW_COLUMNS).setBackground(COLORS.orange);
+  sh.getRange(1, 1, 1, DATA_HEADERS.length).setFontColor('#FFFFFF').setFontWeight('bold');
+  sh.getRange(1, COL.id + 1).setNote('身分證（主鍵）：每則新聞的網址。同一個網址不會出現第二次。');
+  sh.getRange(1, COL.group + 1).setNote('加工欄：程式算出來的。標題很像（同一件事、不同媒體）的，會拿到同一個群組編號。');
+  sh.getRange(1, COL.tags + 1).setNote('加工欄：依「設定」分頁的分類表貼上。');
+  sh.setFrozenRows(1);
+  [140, 440, 110, 130, 130, 80, 150].forEach((w, i) =&gt; sh.setColumnWidth(i + 1, w));
+  sh.getRange('A:A').setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
+}
+
+function prepareBoardSheet_(ss) {
+  const sh = ss.getSheetByName(SHEETS.board) || ss.insertSheet(SHEETS.board, 2);
+  if (sh.getLastRow() === 0) sh.getRange('A1').setValue('抓完第一次，這裡就會出現內容');
+}
+
+function installEditTrigger_(ss) {
+  const exists = ScriptApp.getProjectTriggers().some((t) =&gt; t.getHandlerFunction() === 'onSettingsEdit');
+  if (!exists) ScriptApp.newTrigger('onSettingsEdit').forSpreadsheet(ss).onEdit().create();
+}
+
+function setDailyTrigger_(on) {
+  ScriptApp.getProjectTriggers()
+    .filter((t) =&gt; t.getHandlerFunction() === 'runDaily')
+    .forEach((t) =&gt; ScriptApp.deleteTrigger(t));
+  if (on) ScriptApp.newTrigger('runDaily').timeBased().everyDays(1).atHour(DAILY_HOUR).create();
+  setStatus_(SpreadsheetApp.getActive(), on ? '已開啟：每天早上 8 點左右自動抓' : '已關閉每天自動抓');
+}
+
+// ============================================================
+// 六、小工具
+// ============================================================
+
+/** 從一段 RSS 裡拿出某個標籤的內容 */
+function pickTag_(block, tag) {
+  const m = block.match(new RegExp('&lt;' + tag + '(?:\\s[^&gt;]*)?&gt;([\\s\\S]*?)&lt;/' + tag + '&gt;'));
+  if (!m) return '';
+  return decodeEntities_(m[1].replace(/^&lt;!\[CDATA\[|\]\]&gt;$/g, '')).trim();
+}
+
+/** 把 &amp;amp; 這類跳脫字元還原成原本的字 */
+function decodeEntities_(s) {
+  const named = { amp: '&amp;', lt: '&lt;', gt: '&gt;', quot: '"', apos: "'", nbsp: ' ' };
+  return s.replace(/&amp;(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, (m, e) =&gt; {
+    const k = e.toLowerCase();
+    if (k[0] !== '#') return named[k];
+    return String.fromCodePoint(k[1] === 'x' ? parseInt(k.slice(2), 16) : parseInt(k.slice(1), 10));
+  });
+}
+
+function formatTime_(ss, date) {
+  return Utilities.formatDate(date, ss.getSpreadsheetTimeZone(), 'M/d HH:mm');
+}
+
+// ===== 程式結尾（看到這一行才算貼完整）=====</pre></details>
 
 <h2>想再往前一步</h2>
 <p>QUERY、filter／reduce、clasp、AI 補欄：看<a href="advanced.html">進階包</a>。課堂上那三個動作已經夠用，這四條不急。</p>
 
-<footer>資料庫工作坊 · 科技轉型辦公室 · 產生於 2026-09-30<br>這頁用電腦開也一樣，內容完全相同。</footer>
+<footer>資料庫工作坊 · 科技轉型辦公室 · 產生於 2026-10-08<br>這頁用電腦開也一樣，內容完全相同。</footer>
 </main>
 <script>
 (function(){
