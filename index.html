@@ -149,6 +149,7 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 - 程式會跑在 Google 試算表的 Apps Script（Google 內建的小程式）裡。我會把你給的程式整份貼進去，按「執行」。
 - 程式的骨架已經寫好、測過了，在這份訊息最後面的【骨架程式】。它會：照「設定」分頁的分類表去抓資料、用「身分證」擋掉重複、標題很像的收成同一群組、記下抓取時間、新抓到的資料亮黃燈；「設定」分頁勾一下「立刻抓」就抓，勾「每天自動抓」就每天早上 8 點自己跑。
 - 骨架只吃 RSS（訂閱格式）的來源，預設是 Google 新聞的 RSS：關鍵字由分類表決定，台灣多數媒體的新聞都會被它收錄。
+- 骨架最後面已經有儀表板要用的 doGet()（打開網址時用）和 getDashboardData()（把「資料」分頁交給網頁）。要做儀表板時，你只交一個 dashboard.html，不寫任何 .gs 程式。
 - 你只能改骨架裡我在【問完之後】列出的那幾個地方，其他一個字都不能動，也不能自己重寫一份。
 
 【開場（第一句就照這樣講）】
@@ -242,40 +243,42 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 
 4. 之後依序給（有才給）：
    - 第 4 題不是「無」：一段我每週可以重複用的「統整 prompt」：開頭說清楚角色、要產出什麼、格式、給誰看，留一個明顯的標記「=== 把這週的資料貼這裡 ===」。用法：在「資料」分頁選取要統整的那幾列、複製，貼到標記的地方送出。
-   - 第 5 題選「要」（已在第 5 題確認用途和風格）：根據你選的「圖表風格」和「用途」交儀表板程式碼（HTML）。
-   
-   【儀表板程式碼規則】
-   我答完選擇後，你交儀表板程式碼：
-   ① 給我完整的 HTML 程式碼，一個 `&lt;html&gt;` 開頭、`&lt;/html&gt;` 結尾的完整網頁（不要省略、不要分段）。
-   ② 程式碼必須符合我選的「圖表風格」和「用途」：
-      - 選的風格決定配色、排版、圖表視覺風格
-      - 選的用途決定資訊優先順序、詳細程度、互動方式
-   ③ 必須包含：深淺主題切換按鈕、響應式設計（手機也好看）、圖表自動讀試算表資料（用 Google Charts 或 Chart.js，不要其他套件）
-   ④ **必須包含 doGet() 函式**（Google Apps Script 網頁應用程式的必要函式）。
-      完整程式的結構是：HTML 程式碼 → 換行 → `function doGet() { return HtmlService.createHtmlOutput(/* HTML 在這裡 */); }`。
-      或者：HTML 寫在 dashboard.html 分開的檔案裡，Code.gs 最後加 `function doGet() { return HtmlService.createTemplateFromFile('dashboard.html').evaluate(); }`。
-   ⑤ 程式碼最後一行一定要是 `}`（doGet 函式的結尾）。給完之後先自己檢查：最後一行在不在。
+   - 第 5 題選「要」：依我選的「圖表風格」和「用途」，交一份 dashboard.html。
 
-5. 儀表板貼上與部署（第 5 題選「要」時的步驟）：
-   ① 在 Apps Script 上方選單新建一個檔案：「+」→「HTML」，檔名叫「dashboard.html」。
-   ② 右邊編輯區原本有範例，全選刪掉，貼上我交給你的 HTML 程式碼（從 `&lt;html&gt;` 到包含 doGet 函式的最後一個 `}`）。
-   ③ 按 Ctrl+S 存檔。
-   ④ 回到「程式碼.gs」，確認最後面有我寫的 doGet() 函式。如果沒有，複製我給的 doGet 部分貼在最後（`function doGet() { ... }`）。
-   ⑤ 選上方選單「部署」（不是「執行」）→「新增部署」→「類型」選「網頁應用程式」。
-   ⑥ 跳出視窗：「執行身分」選你的帳號，「誰可以存取」選「任何人」。點「部署」。
-   ⑦ 完成。會出現一個網址，貼進瀏覽器打開就看到儀表板。每次「資料」分頁有新資料，重新整理網頁就更新。
-      （如果打開時報錯「找不到指令碼函式：doGet」，表示 doGet() 沒有正確複製，回頭檢查第 ④ 步。）
+   【儀表板程式碼規則】
+   ① 骨架已經有 doGet() 和 getDashboardData()。你不要寫 doGet、不要改骨架、不要另外給 .gs 程式；HTML 裡的程式不會被當成 Apps Script 執行，doGet 寫在 HTML 裡一定會出現「找不到指令碼函式：doGet」。
+   ② 只交一個檔案：dashboard.html。完整網頁，&lt;!DOCTYPE html&gt; 開頭、&lt;/html&gt; 結尾，放在一個程式碼區塊裡，不要省略、不要分段。最後一行一定是 &lt;/html&gt;，給完先自己檢查。
+   ③ 資料只用這一種方式拿：
+      google.script.run.withSuccessHandler(畫圖的函式).withFailureHandler(顯示錯誤的函式).getDashboardData();
+      回傳格式：{ headers: 欄名 7 個, rows: [[身分證, 標題, 媒體, 發布時間, 抓取時間, 群組, 標註], …]（最新的在最前面）, updatedAt }
+      日期是 ISO 文字，用 new Date() 轉；「標註」長這樣：【分類A】【分類B】，一則可能有好幾類；「群組」空白代表沒有同一件事的其他報導。
+   ④ 不要用 fetch、sheetdb、Google Sheets API、金鑰，也不要叫我手動貼資料。
+   ⑤ 圖表只用 Google Charts 或 Chart.js（從 CDN 載入），不要其他套件。
+   ⑥ 風格決定配色、排版、圖表樣式；用途決定資訊順序、詳細程度、互動方式。
+   ⑦ 一定要有：深淺主題切換按鈕、手機也好看、載入中提示；資料是空的時候顯示「還沒有資料，先回試算表勾『立刻抓』」。
+
+5. 儀表板貼上與部署（第 5 題選「要」才給），一步一行：
+   ① Apps Script 左邊「檔案」旁的「＋」→「HTML」，檔名打 dashboard（只打這幾個字，系統會自己加 .html）。
+   ② 右邊原本有幾行範例，全選刪掉，貼上整份 dashboard.html，按 Ctrl+S 存檔。
+   ③ 點「程式碼.gs」，按 Ctrl+F 搜 doGet：找得到就對了（骨架本來就有）；找不到代表骨架沒貼完整，整份重貼。
+   ④ 右上角藍色「部署」→「新增部署」→ 左邊齒輪選「網頁應用程式」。
+   ⑤ 「執行身分」選「我」，「誰可以存取」選「任何人」→ 按「部署」。跳授權就跟前面一樣按「允許」。
+   ⑥ 複製「網頁應用程式」的網址，貼進瀏覽器打開就看到儀表板。之後「資料」分頁有新資料，重新整理網頁就會更新。
+   ⑦ 之後只要改了程式或 dashboard.html，一定要再按一次「部署」→「新增部署」，用新的網址；舊網址跑的還是舊版本。
 
 6. 出錯怎麼辦（我貼回來時照這樣處理）：
    - 我貼紅字錯誤訊息：先用白話說是什麼原因，再給修正後的「完整程式」（還是整份，不是片段），最後列出你改了哪幾行、為什麼。
    - 「本次新增 0 筆」：不是壞掉。多半是相關字太冷門或天數太短；請我到「設定」分頁把天數改 30，再勾一次「立刻抓」。
    - 時間看起來差了幾小時：請我在試算表「檔案」→「設定」→ 時區改「台北」。
    - 「某某 這次沒抓到，下次再試」：來源暫時連不上，舊資料沒事，隔天會自己再抓。
-   - 儀表板網頁打不開，報錯「找不到指令碼函式：doGet」：表示 doGet() 函式沒有正確複製進 dashboard.html 或 Code.gs。檢查我給你的程式碼最後有沒有 `function doGet() { ... }`；如果沒有，複製貼上到 Code.gs 最後，再部署一次。
-   - 儀表板一片空白或顯示有誤：試試「清除瀏覽器快取」、用無痕視窗重開、或確認「資料」分頁的欄位順序沒被搬動。
+   - 儀表板出現「找不到以下指令碼函式：doGet」：一步一步帶我查，不要叫我把 doGet 貼進 HTML：
+     ⑴ 在「程式碼.gs」按 Ctrl+F 搜 doGet，搜不到 → 骨架沒貼完整，整份重貼、存檔。
+     ⑵ 搜得到 → 部署的是舊版本：按「部署」→「新增部署」重新部署，用新網址開。
+   - 儀表板顯示「還沒有儀表板」：HTML 檔名不對或沒存檔。檔名改成 dashboard、按 Ctrl+S，再「新增部署」一次。
+   - 儀表板一片空白或圖表沒出現：請我在儀表板頁面按 F12 →「Console」，把紅字貼給你；修好後一樣交完整的 dashboard.html。
    - 每次重新給程式之前，先把目前的分類表和設定重列一次讓我確認，避免對話太長你記錯。
 
-6. 最後附三句我之後可以直接貼給你的話：
+7. 最後附三句我之後可以直接貼給你的話：
    「幫我在分類表加一類：〇〇，相關字你先想」
    「我想改成抓 △△ 的 RSS，網址是…，幫我改『來源網址』和『要抓的項目』」
    「幫我寫一段每週摘要的 prompt，給主管看的」
@@ -284,8 +287,8 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-si
 - 不要一次丟五題。不要幫我決定，每題攤開來問。
 - 不要在我說「對」之前產出程式（包括儀表板 HTML）。
 - 不要省略、精簡、重排骨架，不要自己重寫一份，不要用骨架以外的做法。
-- 不要用外部套件、不要叫我申請 API 金鑰。Apps Script 部署要按，但 HTML 部分要我自己按。
-- 儀表板 HTML：只用 Google Charts 或 Chart.js，不要其他套件；不要自己連試算表（Google Sheets API 太複雜，改用 HTML 表格讀 sheetdb 或我手動複製資料進去）。
+- 不要用外部套件、不要叫我申請 API 金鑰。部署由我自己按，你只給步驟。
+- 儀表板：不要寫 doGet、不要給 .gs 程式；資料只用 getDashboardData() 拿；圖表只用 Google Charts 或 Chart.js。
 - 不接受「都可以」「差不多」；換個具體問法再問一次。
 - 我連續幾題都只回「好」的話，提醒我：只是點頭的表，做出來不會有人用。
 
@@ -835,6 +838,42 @@ function decodeEntities_(s) {
 
 function formatTime_(ss, date) {
   return Utilities.formatDate(date, ss.getSpreadsheetTimeZone(), 'M/d HH:mm');
+}
+
+// ============================================================
+// 七、儀表板（選用）：沒做儀表板的話，這一段不會被用到
+//     網頁只認 doGet，所以它固定寫在這裡；HTML 檔只負責畫面
+// ============================================================
+
+const DASHBOARD_FILES = ['dashboard', 'dashboard.html', '儀表板']; // 新增 HTML 檔時取的名字，這幾種都認
+const DASHBOARD_MAX_ROWS = 2000; // 儀表板只讀最新的這麼多筆，資料再多也開得快
+
+/** 「部署」成網頁應用程式後，打開網址時 Google 會呼叫這裡 */
+function doGet() {
+  for (let i = 0; i &lt; DASHBOARD_FILES.length; i++) {
+    try {
+      return HtmlService.createHtmlOutputFromFile(DASHBOARD_FILES[i])
+        .setTitle('儀表板')
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    } catch (err) {
+      // 這個名字的檔案不存在，換下一個
+    }
+  }
+  return HtmlService.createHtmlOutput(
+    '&lt;p style="font:16px/1.7 sans-serif;padding:24px"&gt;還沒有儀表板：在 Apps Script 左邊按「＋」→「HTML」，' +
+    '檔名打 dashboard，貼上 AI 給的 HTML、存檔，再按「部署」→「新增部署」一次。&lt;/p&gt;')
+    .setTitle('儀表板');
+}
+
+/** 儀表板網頁要資料時呼叫這裡（網頁裡寫 google.script.run.getDashboardData()） */
+function getDashboardData() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(SHEETS.data);
+  const rows = sheet ? readDataRows_(sheet).slice(0, DASHBOARD_MAX_ROWS) : [];
+  return {
+    headers: DATA_HEADERS,
+    rows: rows.map((r) =&gt; r.map((v) =&gt; (v instanceof Date ? v.toISOString() : v))), // 日期轉文字，網頁才收得到
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 // ===== 程式結尾（看到這一行才算貼完整）=====</pre>
